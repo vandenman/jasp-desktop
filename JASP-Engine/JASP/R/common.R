@@ -1103,7 +1103,7 @@ saveImage <- function(plotName, format, height, width){
 
 }
 
-.newProgressbar <- function(ticks, callback, skim=5, response=FALSE) {
+.newProgressbar <- function(ticks, callback, skim=5, response=FALSE, parallel=FALSE) {
 	
 	ticks <- suppressWarnings(as.integer(ticks))
 	if (is.na(ticks) || ticks <= 0)
@@ -1115,7 +1115,10 @@ saveImage <- function(plotName, format, height, width){
 	if (! is.numeric(skim) || skim < 0 || skim >= 100)
 		stop("Invalid value provided to 'skim', expecting numeric value in the range of 0-99")
 	
-	progress <- 0
+	if (parallel == TRUE)
+	  response <- TRUE
+
+  progress <- 0
 	tick <- (100 - skim) / ticks
 	createEmpty <- TRUE
 	
@@ -1139,5 +1142,48 @@ saveImage <- function(plotName, format, height, width){
 	
 	updater() # create empty progressbar
 	
+	if (parallel)
+    return(structure(list(updater=updater), class="JASP-progressbar"))
+	
 	return(updater)
+}
+
+.updateParallelProgressbar <- function(progressbar, cluster, results=NULL, complete=FALSE) {
+  
+  if (! inherits(progressbar, "JASP-progressbar"))
+    stop("Object provided in 'progressbar' is not of class JASP progressbar")
+  
+  if (! inherits(cluster, "cluster"))
+    stop("Object provided in 'cluster' is not of class cluster")
+  
+  response <- progressbar$updater(results, complete)
+  
+  if (! .shouldContinue(response)) {
+    snow::stopCluster(cluster)
+    stop("Cancelled by callback")
+  }
+  
+  invisible(response)
+}
+
+.makeParallelSetup <- function(pb=NULL, objs=NULL, env=NULL) {
+  
+  nCores <- parallel::detectCores(TRUE) - 1
+  if (is.na(nCores) || nCores == 0)
+    nCores <- 1
+  
+  cl <- snow::makeSOCKcluster(nCores)
+  doSNOW::registerDoSNOW(cl)
+  if (! is.null(objs) && ! is.null(env))
+    snow::clusterExport(cl, objs, envir=env)
+  
+  dopar <- foreach::`%dopar%`
+  
+  progress <- NULL
+  if (! is.null(pb))
+    progress <- function() .updateParallelProgressbar(pb, cl)
+  
+  stopCluster <- substitute(try(snow::stopCluster(cl), silent=TRUE))
+  
+  return(list(cl=cl, progress=list(progress=progress), dopar=dopar, stopCluster=stopCluster))
 }
