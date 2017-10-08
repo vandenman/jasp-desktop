@@ -1141,3 +1141,18 @@ saveImage <- function(plotName, format, height, width){
 	
 	return(updater)
 }
+
+editImage <- function(plotName, format, height, width) {
+  
+  print("Got to R code: editImage()")
+  # Retrieve plot object from state
+  state <- .retrieveState()
+  plt <- state[["figures"]][[plotName]]
+  
+  if (ggplot2::is.ggplot(plt)) {
+    plt2 <- ggedit::ggedit(plt2)
+  }
+
+  return(NULL)
+  
+}

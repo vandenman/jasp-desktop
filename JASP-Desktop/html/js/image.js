@@ -42,6 +42,14 @@ JASPWidgets.imageView = JASPWidgets.objectView.extend({
 		return this.model.get("convertible") == true;
 	},
 
+    editImageClicked: function(){
+      var options = {name: this.model.get("data"), width: this.model.get("width"), height: this.model.get("height")};
+      this.model.trigger("EditImage:clicked", options);
+    },
+    isEditable: function() {
+      return this.model.get("editable") == true;
+    },
+
 	hasNotes: function () {
 		return this.$el.hasClass('jasp-collection-item') === false;
 	},

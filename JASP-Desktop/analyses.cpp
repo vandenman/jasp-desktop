@@ -69,6 +69,7 @@ Analysis *Analyses::create(const QString &name, int id, const Version &version, 
 	analysis->toRefresh.connect(boost::bind(&Analyses::analysisToRefreshHandler, this, _1));
 	analysis->saveImage.connect(boost::bind(&Analyses::analysisSaveImageHandler, this, _1, _2));
 	analysis->imageSaved.connect(boost::bind(&Analyses::analysisImageSavedHandler, this, _1));
+    analysis->editImage.connect(boost::bind(&Analyses::analysisEditImageHandler, this, _1, _2));
 	analysis->resultsChanged.connect(boost::bind(&Analyses::analysisResultsChangedHandler, this, _1));
 	analysis->userDataLoaded.connect(boost::bind(&Analyses::analysisUserDataLoadedHandler, this, _1));
 
@@ -243,4 +244,10 @@ void Analyses::analysisSaveImageHandler(Analysis *analysis, Json::Value &options
 	analysisSaveImage(analysis);
 }
 
+void Analyses::analysisEditImageHandler(Analysis *analysis, Json::Value &options)
+{
+    analysis->setStatus(Analysis::EditImg);
+    analysis->setSaveImgOptions(options);
+    analysisEditImage(analysis);
+}
 
