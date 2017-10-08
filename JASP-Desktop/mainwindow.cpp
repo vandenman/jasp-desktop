@@ -1881,7 +1881,7 @@ void MainWindow::showAnalysesMenuHandler(QString options)
 	QIcon _collapseIcon = QIcon(":/icons/collapse.png");
 	QIcon _expandIcon = QIcon(":/icons/expand.png");
 	QIcon _saveImageIcon = QIcon(":/icons/document-save-as.png");
-    QIcon _editImageIcon = QIcon(":/icons/document-save-as.png");
+    QIcon _editImageIcon = QIcon(":/icons/editImage.png");
 
 	_analysisMenu->clear();
 
