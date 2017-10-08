@@ -436,6 +436,10 @@ TTestBayesianIndependentSamples <- function(dataset=NULL, options, perform="run"
 								
 								p <- .plot2GroupMeansBayesIndTtest(v1 = group2, v2 = group1, nameV1 = g1, nameV2 = g2, 
 																   groupingName = options$groupingVariable, dependentName = variable, descriptivesPlotsCredibleInterval=options$descriptivesPlotsCredibleInterval)
+								p <- ggplot2::ggplot(data = data.frame(x=0:100, y = (-50:50)^2, g = factor(rep(1:3, c(34, 33, 34)))),
+								                     mapping = ggplot2::aes(x = x, y = y, color = g)) + 
+								  ggplot2::geom_point() + 
+								  ggplot2::geom_line()
 								content <- .writeImage(width = options$plotWidth, height = options$plotHeight, plot = p, obj = TRUE)
 								
 								plot[["convertible"]] <- TRUE

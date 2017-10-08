@@ -1142,17 +1142,66 @@ saveImage <- function(plotName, format, height, width){
 	return(updater)
 }
 
+# not .editImage() because RInside (interface to CPP) cannot handle that
 editImage <- function(plotName, format, height, width) {
   
   print("Got to R code: editImage()")
+  print(plotName)
   # Retrieve plot object from state
   state <- .retrieveState()
   plt <- state[["figures"]][[plotName]]
   
   if (ggplot2::is.ggplot(plt)) {
-    plt2 <- ggedit::ggedit(plt2)
+    # plt2 <- ggedit::ggedit(plt, viewer = shiny::dialogViewer(dialogName = "Plot Editing"))
+    pltNew <- ggedit::ggedit(plt, viewer = shiny::browserViewer())
   }
-
-  return(NULL)
   
+  # only resave state if something actually changed
+  if (!identical(pltNew$UpdatedPlots, plt)) {
+    
+    print("Saved new figure")
+    state[["figures"]][[plotName]] <- pltNew[["UpdatedPlots"]][[1]]
+    # TODO: use writeImage to save the new plot, and .modifyStateFigures so the data element points to that.
+    state <- .modifyStateFigures(state, identifier = plotName, replacement = pltNew[["UpdatedPlots"]][[1]])
+    .saveState(state)
+    
+  }
+  print("Exit plot editing")
+  
+  # print state location
+  location <- .fromRCPP(".requestStateFileNameNative")
+  print(sprintf("load('%s')", location))
+  
+  # Create JSON string for interpretation by JASP front-end. Contains 
+  relativePath <- base::gsub("(?<=\\.)(?!.*\\.).*", "png", format, perl = TRUE)
+  fullPath <- paste(location$root, relativePath, sep="/")
+  base::Encoding(relativePath) <- "UTF-8"
+  result <- paste0("{ \"status\" : \"imageEdited\", \"results\" : { \"name\" : \"", relativePath , "\" } }")
+  
+  # Return result
+  return(result)
+  
+}
+
+.modifyStateFigures <- function(x, identifier, replacement) {
+  
+  # recursive function that traverses the entire state object to replace old figures with new figures
+  # it searches a list where lst[["data"]] == identifier and then does lst[["obj"]] <- replacement
+  # TODO: also add specific modifications for writeImage?
+  
+  # check if list
+  if (inherits(x, "list")) { # not is.list to avoid false positive (i.e. ggplot objects are lists)
+    
+    # check if plotting list we're looking for
+    if (!is.null(x[["editable"]]) && x[["data"]] == identifier) {
+      x[["obj"]] <- replacement # put in the new 
+      return(x)
+    } else {
+      # check if criteria are met in any of the sublists
+      return(lapply(x, .modifyStateFigures, identifier = identifier, replacement = replacement))
+    }
+  } else { 
+    # return ordinary object
+    return(x)
+  }
 }
