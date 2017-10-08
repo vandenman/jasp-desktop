@@ -1040,7 +1040,7 @@ JASPWidgets.Toolbar = JASPWidgets.View.extend({
 			objectName: parent.menuName,
 		};
 
-        this.hasMenu = this.options.hasCopy || this.options.hasCite || this.options.hasSaveImg || this.options.hasNotes || this.options.hasRemove || this.options.hasRemoveAll || this.options.hasEditTitle || this.options.hasCollapse;
+        this.hasMenu = this.options.hasCopy || this.options.hasCite || this.options.hasSaveImg || this.options.hasEditImg || this.options.hasNotes || this.options.hasRemove || this.options.hasRemoveAll || this.options.hasEditTitle || this.options.hasCollapse;
 	},
 
 	selectionElement: function() {
