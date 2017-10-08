@@ -156,6 +156,8 @@ Json::Value Analysis::asJSON() const
 		break;
 	case Analysis::SaveImg:
 		status = "SaveImg";
+    case Analysis::EditImg:
+        status = "EditImg";
 	case Analysis::Exception:
 		status = "exception";
 		break;
@@ -275,3 +277,5 @@ Json::Value Analysis::getImgResults()
 {
 	return _imgResults;
 }
+
+

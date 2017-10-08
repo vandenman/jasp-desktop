@@ -167,6 +167,7 @@ private slots:
 	void copySelected();
 	void citeSelected();
 	void saveImage();
+    void editImage();
 	void noteSelected();
 	void menuHidding();
 

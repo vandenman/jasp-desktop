@@ -29,7 +29,7 @@ class Analysis
 {
 public:
 
-	enum Status { Empty, Initing, Inited, InitedAndWaiting, Running, Complete, Aborting, Aborted, Error, SaveImg, Exception };
+    enum Status { Empty, Initing, Inited, InitedAndWaiting, Running, Complete, Aborting, Aborted, Error, SaveImg, EditImg, Exception };
 
 	Analysis(int id, std::string name, Options *options, const Version &version, bool isAutorun = true, bool usedata = true);
 	virtual ~Analysis();
@@ -40,6 +40,7 @@ public:
 	boost::signals2::signal<void (Analysis *source)> toRefresh;
 	boost::signals2::signal<void (Analysis *source, Json::Value &options)> saveImage;
 	boost::signals2::signal<void (Analysis *source)> imageSaved;
+    boost::signals2::signal<void (Analysis *source, Json::Value &options)> editImage;
 	boost::signals2::signal<void (Analysis *source)> resultsChanged;
 	boost::signals2::signal<void (Analysis *source)> userDataLoaded;
 

@@ -232,6 +232,7 @@ MainWindow::MainWindow(QWidget *parent) :
 	connect(this, SIGNAL(saveTextToFile(QString, QString)), this, SLOT(saveTextToFileHandler(QString, QString)));
 	connect(this, SIGNAL(analysisChangedDownstream(int, QString)), this, SLOT(analysisChangedDownstreamHandler(int, QString)));
 	connect(this, SIGNAL(analysisSaveImage(int, QString)), this, SLOT(analysisSaveImageHandler(int, QString)));
+    connect(this, SIGNAL(analysisEditImage(int, QString)), this, SLOT(analysisEditImageHandler(int, QString)));
 	connect(this, SIGNAL(showAnalysesMenu(QString)), this, SLOT(showAnalysesMenuHandler(QString)));
 	connect(this, SIGNAL(removeAnalysisRequest(int)), this, SLOT(removeAnalysisRequestHandler(int)));
 	connect(this, SIGNAL(updateUserData(int, QString)), this, SLOT(updateUserDataHandler(int, QString)));
@@ -1826,6 +1827,7 @@ void MainWindow::showAnalysesMenuHandler(QString options)
 	QIcon _collapseIcon = QIcon(":/icons/collapse.png");
 	QIcon _expandIcon = QIcon(":/icons/expand.png");
 	QIcon _saveImageIcon = QIcon(":/icons/document-save-as.png");
+    QIcon _editImageIcon = QIcon(":/icons/document-save-as.png");
 
 	_analysisMenu->clear();
 
@@ -1858,6 +1860,11 @@ void MainWindow::showAnalysesMenuHandler(QString options)
 	{
 		_analysisMenu->addAction(_saveImageIcon, "Save Image As", this, SLOT(saveImage()));
 	}
+
+    if (menuOptions["hasEditImg"].asBool())
+    {
+        _analysisMenu->addAction(_editImageIcon, "Edit Image", this, SLOT(editImage()));
+    }
 
 	if (menuOptions["hasNotes"].asBool())
 	{
@@ -2016,6 +2023,11 @@ void MainWindow::citeSelected()
 void MainWindow::saveImage()
 {
 	ui->webViewResults->page()->mainFrame()->evaluateJavaScript("window.saveImageClicked();");
+}
+
+void MainWindow::editImage()
+{
+    ui->webViewResults->page()->mainFrame()->evaluateJavaScript("window.editImageClicked();");
 }
 
 void MainWindow::noteSelected()

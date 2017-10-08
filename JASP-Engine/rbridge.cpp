@@ -535,3 +535,25 @@ string rbridge_saveImage(const string &name, const string &type, const int &heig
 	else
 		return "null";
 }
+
+string rbridge_editImage(const string &name, const string &type, const int &height, const int &width, const int ppi)
+
+{
+    std::cout << "Got to Rcpp code: rbridge_editImage())" << std::endl;
+
+    RInside &rInside = rbridge_rinside->instance();
+
+    rInside["plotName"] = name;
+    rInside["format"] = type;
+
+    rInside["height"] = height;
+    rInside["width"] = width;
+    rInside[".ppi"] = ppi;
+
+    SEXP result = rbridge_rinside->parseEvalNT("editImage(plotName,format,height,width)");
+
+    if (Rf_isString(result))
+        return Rcpp::as<string>(result);
+    else
+        return "null";
+}
