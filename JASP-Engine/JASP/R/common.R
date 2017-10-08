@@ -1179,7 +1179,7 @@ editImage <- function(plotName, format, height, width) {
   result <- paste0("{ \"status\" : \"imageEdited\", \"results\" : { \"name\" : \"", relativePath , "\" } }")
   
   # Return result
-  return(result)
+  return(NULL)
   
 }
 
