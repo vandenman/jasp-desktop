@@ -696,41 +696,6 @@ void MainWindow::analysisEditImageHandler(int id, QString options)
 
     return;
 
-    QString caption = "Save JASP Image";
-    QString filter = "Portable Network Graphics (*.png);;Portable Document Format (*.pdf);;Encapsulated PostScript (*.eps);;300 dpi Tagged Image File (*.tiff)";
-    QString selectedFilter;
-
-    QString finalPath = QFileDialog::getSaveFileName(this, caption, QString(), filter, &selectedFilter);
-    if (!finalPath.isEmpty())
-    {
-        if (selectedFilter == "Encapsulated PostScript (*.eps)")
-        {
-            root["type"] = "eps";
-            root["finalPath"] = finalPath.toStdString();
-            analysis->saveImage(analysis, root);
-        }
-        else if (selectedFilter == "Portable Document Format (*.pdf)")
-        {
-            root["type"] = "pdf";
-            root["finalPath"] = finalPath.toStdString();
-            analysis->saveImage(analysis, root);
-        }
-        else if (selectedFilter == "300 dpi Tagged Image File (*.tiff)")
-        {
-            root["type"] = "tiff";
-            root["finalPath"] = finalPath.toStdString();
-            analysis->saveImage(analysis, root);
-        }
-        else
-        {
-            QString imagePath = QString::fromStdString(tempfiles_sessionDirName()) + "/" + root.get("name", Json::nullValue).asCString();
-            if (QFile::exists(finalPath))
-            {
-                QFile::remove(finalPath);
-            }
-            QFile::copy(imagePath, finalPath);
-        }
-    }
 }
 
 
@@ -1917,8 +1882,6 @@ void MainWindow::showAnalysesMenuHandler(QString options)
 
     if (menuOptions["hasEditImg"].asBool())
     {
-        std::cout << "if (menuOptions['hasEditImg'].asBool()) == TRUE" << std::endl;
-        std::cout.flush();
         _analysisMenu->addAction(_editImageIcon, "Edit Image", this, SLOT(editImage()));
     }
 

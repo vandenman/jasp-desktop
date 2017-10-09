@@ -924,7 +924,7 @@ as.list.footnotes <- function(footnotes) {
 }
 
 
-.writeImage <- function(width=320, height=320, plot, obj = TRUE){
+.writeImage <- function(width=320, height=320, plot, obj = TRUE, relativePathpng = NULL){
 	# Initialise output object
 	image <- list()
 
@@ -939,7 +939,12 @@ as.list.footnotes <- function(footnotes) {
 	
 	# Create png file location
 	location <- .fromRCPP(".requestTempFileNameNative", "png")
-	relativePathpng <- location$relativePath
+	if (is.null(relativePathpng)) {
+	  relativePathpng <- location$relativePath
+	  print("relativePathpng was NULL")
+	} else {
+	  print("relativePathpng was not NULL")
+	}
 	fullPathpng <- paste(location$root, relativePathpng, sep="/")
 	base::Encoding(relativePathpng) <- "UTF-8"
 	base::Encoding(fullPathpng) <- "UTF-8"
@@ -1153,33 +1158,46 @@ editImage <- function(plotName, format, height, width) {
   
   if (ggplot2::is.ggplot(plt)) {
     # plt2 <- ggedit::ggedit(plt, viewer = shiny::dialogViewer(dialogName = "Plot Editing"))
+    print("Editing figure")
     pltNew <- ggedit::ggedit(plt, viewer = shiny::browserViewer())
-  }
-  
-  # only resave state if something actually changed
-  if (!identical(pltNew$UpdatedPlots, plt)) {
     
-    print("Saved new figure")
-    state[["figures"]][[plotName]] <- pltNew[["UpdatedPlots"]][[1]]
-    # TODO: use writeImage to save the new plot, and .modifyStateFigures so the data element points to that.
-    state <- .modifyStateFigures(state, identifier = plotName, replacement = pltNew[["UpdatedPlots"]][[1]])
-    .saveState(state)
-    
+    # only resave state if something actually changed
+    if (!identical(pltNew$UpdatedPlots, plt)) {
+      
+      print("Saving edited figure")
+      # start from previous plot -- should be done earlier cause w/ h are important
+      newPlot <- .getFigureFromState(state, plotName)
+      newPlot <- newPlot[unique(names(newPlot))] # keep only one match (should be identical anyway)
+      
+      # save modified plot
+      content <- .writeImage(width = newPlot[["width"]], height = newPlot[["height"]], 
+                             plot = pltNew[["UpdatedPlots"]][[1]], obj = TRUE, 
+                             relativePathpng = plotName)
+      newPlot[["data"]] <- content[["png"]]
+      newPlot[["obj"]] <- content[["obj"]]
+      state[["figures"]][[plotName]] <- pltNew[["UpdatedPlots"]][[1]]
+      
+      # TODO: use writeImage to save the new plot, and .modifyStateFigures so the data element points to that.
+      state <- .modifyStateFigures(state, identifier = plotName, replacement = newPlot)#pltNew[["UpdatedPlots"]][[1]])
+      .saveState(state)
+      
+    }
   }
   print("Exit plot editing")
   
   # print state location
-  location <- .fromRCPP(".requestStateFileNameNative")
-  print(sprintf("load('%s')", location))
+  # location <- .fromRCPP(".requestStateFileNameNative")
+  # print(sprintf("load('%s')", location))
   
   # Create JSON string for interpretation by JASP front-end. Contains 
+  location <- .fromRCPP(".requestTempFileNameNative", "png") # to extract the root location
   relativePath <- base::gsub("(?<=\\.)(?!.*\\.).*", "png", format, perl = TRUE)
   fullPath <- paste(location$root, relativePath, sep="/")
   base::Encoding(relativePath) <- "UTF-8"
-  result <- paste0("{ \"status\" : \"imageEdited\", \"results\" : { \"name\" : \"", relativePath , "\" } }")
-  
+  result <- paste0("{ \"status\" : \"running\", \"results\" : { \"name\" : \"", relativePath , "\" } }")
+
   # Return result
-  return(NULL)
+  return(result)
   
 }
 
@@ -1194,8 +1212,9 @@ editImage <- function(plotName, format, height, width) {
     
     # check if plotting list we're looking for
     if (!is.null(x[["editable"]]) && x[["data"]] == identifier) {
-      x[["obj"]] <- replacement # put in the new 
-      return(x)
+      return(replacement)
+      # x[["obj"]] <- replacement # put in the new 
+      # return(x)
     } else {
       # check if criteria are met in any of the sublists
       return(lapply(x, .modifyStateFigures, identifier = identifier, replacement = replacement))
@@ -1203,5 +1222,18 @@ editImage <- function(plotName, format, height, width) {
   } else { 
     # return ordinary object
     return(x)
+  }
+}
+
+.getFigureFromState <- function(x, identifier) {
+  
+  # recursive function that traverses the entire state object to find a plot by the png filename (identifier).
+  # returns all matches found
+  if (is.list(x)) {
+    if (identical(x[["data"]], identifier)) {
+      return(x)
+    } else {
+      return(unlist(lapply(unname(x), .getFigureFromState, identifier), recursive = FALSE))
+    }
   }
 }
