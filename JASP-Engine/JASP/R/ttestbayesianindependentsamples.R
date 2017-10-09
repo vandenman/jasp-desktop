@@ -434,8 +434,8 @@ TTestBayesianIndependentSamples <- function(dataset=NULL, options, perform="run"
 						
 						p <- try(silent= FALSE, expr= {
 								
-								p <- .plot2GroupMeansBayesIndTtest(v1 = group2, v2 = group1, nameV1 = g1, nameV2 = g2, 
-																   groupingName = options$groupingVariable, dependentName = variable, descriptivesPlotsCredibleInterval=options$descriptivesPlotsCredibleInterval)
+								# p <- .plot2GroupMeansBayesIndTtest(v1 = group2, v2 = group1, nameV1 = g1, nameV2 = g2, 
+								# 								   groupingName = options$groupingVariable, dependentName = variable, descriptivesPlotsCredibleInterval=options$descriptivesPlotsCredibleInterval)
 								p <- ggplot2::ggplot(data = data.frame(x=0:100, y = (-50:50)^2, g = factor(rep(1:3, c(34, 33, 34)))),
 								                     mapping = ggplot2::aes(x = x, y = y, color = g)) + 
 								  ggplot2::geom_point() + 
@@ -450,6 +450,10 @@ TTestBayesianIndependentSamples <- function(dataset=NULL, options, perform="run"
 								
 							})
 						
+						}
+						if (inherits(p, "try-error")) {
+						  print("p inherited try error!")
+						  print(p)
 						}
 						
 						plot[["status"]] <- "complete"

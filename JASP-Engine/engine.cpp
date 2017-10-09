@@ -110,13 +110,12 @@ void Engine::editImage()
     std::string result = rbridge_editImage(name, type, height, width, _ppi);
 
     _status = complete;
-//    _status = complete;
-//    Json::Reader parser;
-//    parser.parse(result, _analysisResults, false);
-//    _analysisResults["results"]["inputOptions"] = _imageOptions;
-//    _progress = -1;
-//    sendResults();
-//    _status = empty;
+    Json::Reader parser;
+    parser.parse(result, _analysisResults, false);
+    _analysisResults["results"]["inputOptions"] = _imageOptions;
+    _progress = -1;
+    sendResults();
+    _status = empty;
 
     //tempfiles_deleteList(tempFilesFromLastTime);
 
