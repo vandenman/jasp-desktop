@@ -468,6 +468,11 @@ TTestBayesianIndependentSamples <- function(dataset=NULL, options, perform="run"
 							})
 
 						}
+						if (inherits(p, "try-error")) {
+						  print("p inherited try error!")
+						  print(p)
+						}
+						
 
 						plot[["status"]] <- "complete"
 
