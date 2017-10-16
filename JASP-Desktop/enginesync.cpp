@@ -252,14 +252,21 @@ void EngineSync::process()
 			else if (status == "imageSaved")
 			{
 				analysis->setStatus(Analysis::Complete);
-				analysis->setImageResults(results);
+                analysis->setImageResults(results);
 				_analysesInProgress[i] = NULL;
 				sendMessages();
 			}
+            else if (status == "imageEdited")
+            {
+                analysis->setStatus(Analysis::Complete);
+                analysis->setImageEdited(results);
+                _analysesInProgress[i] = NULL;
+                sendMessages();
+            }
 			else if (status == "complete")
 			{
-				analysis->setStatus(Analysis::Complete);
-				analysis->setResults(results);
+                analysis->setStatus(Analysis::Complete);
+                analysis->setResults(results);
 				_analysesInProgress[i] = NULL;
 				sendMessages();
 			}

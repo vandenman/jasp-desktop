@@ -141,6 +141,7 @@ signals:
 private slots:
 	void analysisResultsChangedHandler(Analysis* analysis);
 	void analysisImageSavedHandler(Analysis* analysis);
+    void analysisImageEditedHandler(Analysis* analysis);
 	void analysisUserDataLoadedHandler(Analysis *analysis);
 	void analysisSelectedHandler(int id);
 	void analysisUnselectedHandler();

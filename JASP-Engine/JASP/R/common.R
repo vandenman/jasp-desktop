@@ -1148,54 +1148,71 @@ saveImage <- function(plotName, format, height, width){
 }
 
 # not .editImage() because RInside (interface to CPP) cannot handle that
-editImage <- function(plotName, format, height, width) {
+editImage <- function(plotName, height, width, resizeOnly = FALSE, customHeight = NULL, customWidth = NULL) {
   
   print("Got to R code: editImage()")
+  str(mget(ls()))
   print(plotName)
   # Retrieve plot object from state
   state <- .retrieveState()
   plt <- state[["figures"]][[plotName]]
   
-  if (ggplot2::is.ggplot(plt)) {
+  if (!resizeOnly && ggplot2::is.ggplot(plt)) {
     # plt2 <- ggedit::ggedit(plt, viewer = shiny::dialogViewer(dialogName = "Plot Editing"))
     print("Editing figure")
     pltNew <- ggedit::ggedit(plt, viewer = shiny::browserViewer())
-    
-    # only resave state if something actually changed
-    if (!identical(pltNew$UpdatedPlots, plt)) {
-      
-      print("Saving edited figure")
-      # start from previous plot -- should be done earlier cause w/ h are important
-      newPlot <- .getFigureFromState(state, plotName)
-      newPlot <- newPlot[unique(names(newPlot))] # keep only one match (should be identical anyway)
-      
-      # save modified plot
-      content <- .writeImage(width = newPlot[["width"]], height = newPlot[["height"]], 
-                             plot = pltNew[["UpdatedPlots"]][[1]], obj = TRUE, 
-                             relativePathpng = plotName)
-      newPlot[["data"]] <- content[["png"]]
-      newPlot[["obj"]] <- content[["obj"]]
-      state[["figures"]][[plotName]] <- pltNew[["UpdatedPlots"]][[1]]
-      
-      # TODO: use writeImage to save the new plot, and .modifyStateFigures so the data element points to that.
-      state <- .modifyStateFigures(state, identifier = plotName, replacement = newPlot)#pltNew[["UpdatedPlots"]][[1]])
-      .saveState(state)
-      
-    }
+    saveThePlot <- !identical(pltNew$UpdatedPlots, plt)
+    plt <- pltNew[["UpdatedPlots"]][[1]]
+  } else { # only resizing
+    saveThePlot <- TRUE
   }
+  
+  # only resave state if something actually changed
+  if (saveThePlot) {
+    
+    print("Saving edited figure")
+    # start from previous plot -- should be done earlier cause w/ h are important
+    newPlot <- .getFigureFromState(state, plotName)
+    newPlot <- newPlot[unique(names(newPlot))] # keep only one match (should be identical anyway)
+    
+    # check if we want custom height/ width (means we're resizing)
+    if (!is.null(customHeight) && customWidth > 0)
+      height = customHeight
+    
+    if (!is.null(customWidth) && customWidth > 0)
+      width = customWidth
+    
+    # save modified plot
+    content <- .writeImage(width = width, height = height,
+                           plot = plt, obj = TRUE,
+                           relativePathpng = plotName)
+    newPlot[["data"]] <- content[["png"]]
+    newPlot[["obj"]] <- content[["obj"]]
+    newPlot[["width"]] <- width
+    newPlot[["height"]] <- height
+    state[["figures"]][[plotName]] <- plt
+    
+    state <- .modifyStateFigures(state, identifier = plotName, replacement = newPlot)
+    .saveState(state)
+    
+  }
+  
   print("Exit plot editing")
   
   # print state location
   # location <- .fromRCPP(".requestStateFileNameNative")
   # print(sprintf("load('%s')", location))
   
-  # Create JSON string for interpretation by JASP front-end. Contains 
+  # Create JSON string for interpretation by JASP front-end. Contains
   location <- .fromRCPP(".requestTempFileNameNative", "png") # to extract the root location
+  format <- ""
   relativePath <- base::gsub("(?<=\\.)(?!.*\\.).*", "png", format, perl = TRUE)
   fullPath <- paste(location$root, relativePath, sep="/")
   base::Encoding(relativePath) <- "UTF-8"
-  result <- paste0("{ \"status\" : \"running\", \"results\" : { \"name\" : \"", relativePath , "\" } }")
-
+  result <- paste0("{ \"status\" : \"imageEdited\", \"results\" : { \"name\" : \"", relativePath , "\" } }")
+  
+  str(result)
+  print("Exit")
   # Return result
   return(result)
   
@@ -1213,13 +1230,13 @@ editImage <- function(plotName, format, height, width) {
     # check if plotting list we're looking for
     if (!is.null(x[["editable"]]) && x[["data"]] == identifier) {
       return(replacement)
-      # x[["obj"]] <- replacement # put in the new 
+      # x[["obj"]] <- replacement # put in the new
       # return(x)
     } else {
       # check if criteria are met in any of the sublists
       return(lapply(x, .modifyStateFigures, identifier = identifier, replacement = replacement))
     }
-  } else { 
+  } else {
     # return ordinary object
     return(x)
   }

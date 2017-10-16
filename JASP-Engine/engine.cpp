@@ -103,11 +103,13 @@ void Engine::editImage()
     RCallback callback = boost::bind(&Engine::callback, this, _1, _2);
 
     std::string name = _imageOptions.get("name", Json::nullValue).asString();
-    std::string type = _imageOptions.get("type", Json::nullValue).asString();
 
     int height = _imageOptions.get("height", Json::nullValue).asInt();
     int width = _imageOptions.get("width", Json::nullValue).asInt();
-    std::string result = rbridge_editImage(name, type, height, width, _ppi);
+    bool resizeOnly = _imageOptions.get("resizeOnly", Json::nullValue).asBool();
+    int customWidth = _imageOptions.get("customWidth", Json::nullValue).asInt();
+    int customHeight = _imageOptions.get("customHeight", Json::nullValue).asInt();
+    std::string result = rbridge_editImage(name, height, width, _ppi, resizeOnly, customHeight, customWidth);
 
     _status = complete;
     Json::Reader parser;

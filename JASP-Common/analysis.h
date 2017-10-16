@@ -41,11 +41,13 @@ public:
 	boost::signals2::signal<void (Analysis *source, Json::Value &options)> saveImage;
 	boost::signals2::signal<void (Analysis *source)> imageSaved;
     boost::signals2::signal<void (Analysis *source, Json::Value &options)> editImage;
+    boost::signals2::signal<void (Analysis *source)> imageEdited;
 	boost::signals2::signal<void (Analysis *source)> resultsChanged;
 	boost::signals2::signal<void (Analysis *source)> userDataLoaded;
 
 	void setResults(Json::Value results, int progress = -1);
 	void setImageResults(Json::Value results);
+    void setImageEdited(Json::Value results);
 	void setUserData(Json::Value userData, bool silient = false);
 	const Json::Value &results() const;
 	const Json::Value &userData() const;

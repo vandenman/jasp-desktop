@@ -81,6 +81,13 @@ void Analysis::setImageResults(Json::Value results)
 	imageSaved(this);
 }
 
+void Analysis::setImageEdited(Json::Value results)
+{
+    _imgResults = results;
+    imageEdited(this);
+}
+
+
 void Analysis::setUserData(Json::Value userData, bool silient)
 {
 	_userData = userData;

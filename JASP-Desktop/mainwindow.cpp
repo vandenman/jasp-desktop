@@ -200,6 +200,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
 	connect(_analyses, SIGNAL(analysisResultsChanged(Analysis*)), this, SLOT(analysisResultsChangedHandler(Analysis*)));
 	connect(_analyses, SIGNAL(analysisImageSaved(Analysis*)), this, SLOT(analysisImageSavedHandler(Analysis*)));
+	connect(_analyses, SIGNAL(analysisImageEdited(Analysis*)), this, SLOT(imageEditedHandler(Analysis*)));
+        connect(_analyses, SIGNAL(analysisImageResized(Analysis*)), this, SLOT(analysisImageResizedHandler(Analysis*)));
 	connect(_analyses, SIGNAL(analysisUserDataLoaded(Analysis*)), this, SLOT(analysisUserDataLoadedHandler(Analysis*)));
 	connect(_analyses, SIGNAL(analysisAdded(Analysis*)), ui->backStage, SLOT(analysisAdded(Analysis*)));
 
@@ -232,7 +234,7 @@ MainWindow::MainWindow(QWidget *parent) :
 	connect(this, SIGNAL(saveTextToFile(QString, QString)), this, SLOT(saveTextToFileHandler(QString, QString)));
 	connect(this, SIGNAL(analysisChangedDownstream(int, QString)), this, SLOT(analysisChangedDownstreamHandler(int, QString)));
 	connect(this, SIGNAL(analysisSaveImage(int, QString)), this, SLOT(analysisSaveImageHandler(int, QString)));
-    connect(this, SIGNAL(analysisEditImage(int, QString)), this, SLOT(analysisEditImageHandler(int, QString)));
+	connect(this, SIGNAL(analysisEditImage(int, QString)), this, SLOT(analysisEditImageHandler(int, QString)));
 	connect(this, SIGNAL(showAnalysesMenu(QString)), this, SLOT(showAnalysesMenuHandler(QString)));
 	connect(this, SIGNAL(removeAnalysisRequest(int)), this, SLOT(removeAnalysisRequestHandler(int)));
 	connect(this, SIGNAL(updateUserData(int, QString)), this, SLOT(updateUserDataHandler(int, QString)));
@@ -698,6 +700,17 @@ void MainWindow::analysisEditImageHandler(int id, QString options)
 
 }
 
+void MainWindow::analysisImageEditedHandler(Analysis *analysis)
+{
+    Json::Value results = analysis->getImgResults();
+    if (results.isNull())
+        return;
+
+    ui->webViewResults->page()->mainFrame()->evaluateJavaScript("window.reRenderAnalyses();");\
+
+    return;
+
+}
 
 AnalysisForm* MainWindow::loadForm(Analysis *analysis)
 {
