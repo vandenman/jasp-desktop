@@ -954,10 +954,12 @@ as.list.footnotes <- function(footnotes) {
 	               height=height * pngMultip, bg="transparent", 
 	               res=72 * pngMultip, type=type)
 	
-	if (class(plot) ==  "function"){
+	if (is.function(plot) && !inherits(plot, "recordedplot")) {
 		if (obj) dev.control('enable') # enable plot recording
 		eval(plot())
 		if (obj) plot <- recordPlot() # save plot to R object
+	} else if (inherits(plot, "recordedplot")) {
+	    .redrawPlot(plot) #(see below)
 	} else {
 		print(plot)
 	}
@@ -1156,7 +1158,7 @@ editImage <- function(plotName, height, width, resizeOnly = FALSE, customHeight 
   # Retrieve plot object from state
   state <- .retrieveState()
   plt <- state[["figures"]][[plotName]]
-  
+
   if (!resizeOnly && ggplot2::is.ggplot(plt)) {
     # plt2 <- ggedit::ggedit(plt, viewer = shiny::dialogViewer(dialogName = "Plot Editing"))
     print("Editing figure")
@@ -1173,16 +1175,21 @@ editImage <- function(plotName, height, width, resizeOnly = FALSE, customHeight 
     print("Saving edited figure")
     # start from previous plot -- should be done earlier cause w/ h are important
     newPlot <- .getFigureFromState(state, plotName)
+    print("names(newPlot) 1")
+    print(names(newPlot))
     newPlot <- newPlot[unique(names(newPlot))] # keep only one match (should be identical anyway)
+    print("names(newPlot) 2")
+    print(names(newPlot))
     
     # check if we want custom height/ width (means we're resizing)
-    if (!is.null(customHeight) && customWidth > 0)
+    if (!is.null(customHeight) && customHeight > 0)
       height = customHeight
     
     if (!is.null(customWidth) && customWidth > 0)
       width = customWidth
     
     # save modified plot
+    print(class(plt))
     content <- .writeImage(width = width, height = height,
                            plot = plt, obj = TRUE,
                            relativePathpng = plotName)
@@ -1203,14 +1210,24 @@ editImage <- function(plotName, height, width, resizeOnly = FALSE, customHeight 
   # location <- .fromRCPP(".requestStateFileNameNative")
   # print(sprintf("load('%s')", location))
   
-  # Create JSON string for interpretation by JASP front-end. Contains
+  # Create JSON string for interpretation by JASP front-end. 
   location <- .fromRCPP(".requestTempFileNameNative", "png") # to extract the root location
   format <- ""
   relativePath <- base::gsub("(?<=\\.)(?!.*\\.).*", "png", format, perl = TRUE)
   fullPath <- paste(location$root, relativePath, sep="/")
   base::Encoding(relativePath) <- "UTF-8"
-  result <- paste0("{ \"status\" : \"imageEdited\", \"results\" : { \"name\" : \"", relativePath , "\" } }")
   
+  result <- list(
+    status = "imageEdited",
+    results = list(
+      name = relativePath,
+      title = newPlot[["title"]]
+    )
+    
+  )
+  # reshape R list to JSON string
+  result <- rjson::toJSON(result)
+
   str(result)
   print("Exit")
   # Return result

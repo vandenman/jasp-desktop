@@ -538,7 +538,6 @@ string rbridge_saveImage(const string &name, const string &type, const int &heig
 
 string rbridge_editImage(const string &name, const int &height, const int &width, const int ppi, const bool &resizeOnly, const int &customHeight, const int &customWidth)
 {
-    std::cout << "Got to Rcpp code: rbridge_editImage())" << std::endl;
 
     RInside &rInside = rbridge_rinside->instance();
 

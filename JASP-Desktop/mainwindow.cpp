@@ -200,8 +200,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 	connect(_analyses, SIGNAL(analysisResultsChanged(Analysis*)), this, SLOT(analysisResultsChangedHandler(Analysis*)));
 	connect(_analyses, SIGNAL(analysisImageSaved(Analysis*)), this, SLOT(analysisImageSavedHandler(Analysis*)));
-	connect(_analyses, SIGNAL(analysisImageEdited(Analysis*)), this, SLOT(imageEditedHandler(Analysis*)));
-        connect(_analyses, SIGNAL(analysisImageResized(Analysis*)), this, SLOT(analysisImageResizedHandler(Analysis*)));
+    connect(_analyses, SIGNAL(analysisImageEdited(Analysis*)), this, SLOT(analysisImageEditedHandler(Analysis*)));
 	connect(_analyses, SIGNAL(analysisUserDataLoaded(Analysis*)), this, SLOT(analysisUserDataLoadedHandler(Analysis*)));
 	connect(_analyses, SIGNAL(analysisAdded(Analysis*)), ui->backStage, SLOT(analysisAdded(Analysis*)));
 
@@ -705,6 +704,9 @@ void MainWindow::analysisImageEditedHandler(Analysis *analysis)
     Json::Value results = analysis->getImgResults();
     if (results.isNull())
         return;
+
+    std::cout << "JSON string for use in Javascript" << std::endl;
+    std::cout << results << std::endl;
 
     ui->webViewResults->page()->mainFrame()->evaluateJavaScript("window.reRenderAnalyses();");\
 
