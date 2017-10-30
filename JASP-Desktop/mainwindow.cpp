@@ -208,6 +208,7 @@ MainWindow::MainWindow(QWidget *parent) :
 	connect(ui->ribbonSEM, SIGNAL(itemSelected(QString)), this, SLOT(itemSelected(QString)));
 	connect(ui->ribbonR11tLearn, SIGNAL(itemSelected(QString)), this, SLOT(itemSelected(QString)));
 	connect(ui->ribbonSummaryStatistics, SIGNAL(itemSelected(QString)), this, SLOT(itemSelected(QString)));
+	connect(ui->ribbonNetworkAnalysis, SIGNAL(itemSelected(QString)), this, SLOT(itemSelected(QString)));
 	connect(ui->backStage, SIGNAL(dataSetIORequest(FileEvent*)), this, SLOT(dataSetIORequest(FileEvent*)));
 	connect(ui->backStage, SIGNAL(exportSelected(QString)), this, SLOT(exportSelected(QString)));
 	connect(ui->variablesPage, SIGNAL(columnChanged(QString)), this, SLOT(refreshAnalysesUsingColumn(QString)));
@@ -919,6 +920,10 @@ void MainWindow::tabChanged(int index)
 		{
 			ui->ribbon->setCurrentIndex(3);
 		}
+		else if(currentActiveTab == "Network Analysis")
+		{
+			ui->ribbon->setCurrentIndex(4);
+		}
 	}
 }
 
@@ -1271,6 +1276,7 @@ void MainWindow::updateMenuEnabledDisabledStatus()
 	ui->ribbonAnalysis->setDataSetLoaded(loaded);
 	ui->ribbonSEM->setDataSetLoaded(loaded);
 	ui->ribbonR11tLearn->setDataSetLoaded(loaded);
+	ui->ribbonNetworkAnalysis->setDataSetLoaded(loaded);
 }
 
 void MainWindow::updateUIFromOptions()
@@ -1296,6 +1302,12 @@ void MainWindow::updateUIFromOptions()
 		ui->tabBar->addTab("Summary Stats");
 	else
 		ui->tabBar->removeTab("Summary Stats");
+
+	QVariant networkAnalysis = _settings.value("toolboxes/networkAnalysis", false);
+	if (networkAnalysis.canConvert(QVariant::Bool) && networkAnalysis.toBool())
+		ui->tabBar->addTab("Network Analysis");
+	else
+		ui->tabBar->removeTab("Network Analysis");
 }
 
 void MainWindow::resultsPageLoaded(bool success)
