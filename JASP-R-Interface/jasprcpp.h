@@ -51,6 +51,10 @@ bool jaspRCPP_setColumnDataAsNominalText(std::string columnName,	Rcpp::Vector<ST
 //Calls from JASPresult (from R)
 typedef void (*sendFuncDef)(const char *);
 
+//Calls from JASPresult (from R)
+typedef void (*sendFuncDef)(const char *);
+extern "C" void jaspRCPP_send(const char * msg);
+
 // This is a copy of column.h!!!!
 enum ColumnType { ColumnTypeUnknown = 0, ColumnTypeNominal = 1, ColumnTypeNominalText = 2, ColumnTypeOrdinal = 4, ColumnTypeScale = 8 };
 
