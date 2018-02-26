@@ -17,6 +17,7 @@
 
 #include "jasprcpp.h"
 #include "rinside_consolelogging.h"
+#include "jaspResults/src/jaspResults.h"
 
 using namespace std;
 
@@ -27,20 +28,24 @@ RInside_ConsoleLogging *rinside_consoleLog;
 RInside *rinside;
 ReadDataSetCB readDataSetCB;
 RunCallbackCB runCallbackCB;
-ReadADataSetCB readFullDataSetCB;
-ReadADataSetCB readFilterDataSetCB;
+ReadADataSetCB readFullDataSetCB, readFilterDataSetCB;
 ReadDataColumnNamesCB readDataColumnNamesCB;
 RequestTempFileNameCB requestTempFileNameCB;
 RequestTempRootNameCB requestTempRootNameCB;
 ReadDataSetDescriptionCB readDataSetDescriptionCB;
-RequestStateFileSourceCB requestStateFileSourceCB;
+RequestSpecificFileSourceCB requestStateFileSourceCB, requestJaspResultsFileSourceCB;
 
 static const string NullString = "null";
 static std::string lastFilterErrorMsg = "";
 
 
 extern "C" {
-void STDCALL jaspRCPP_init(const char* buildYear, const char* version, RBridgeCallBacks* callbacks)
+void jaspRCPP_send(const char * msg)
+{
+	printf("void jaspRCPP_send(const char * msg) got called!\nWith: \"%s\"\n", msg);
+}
+
+void STDCALL jaspRCPP_init(const char* buildYear, const char* version, RBridgeCallBacks* callbacks, sendFuncDef sendToDesktopFunction, pollMessagesFuncDef pollMessagesFunction)
 {
 	rinside = new RInside();
 #ifndef __WIN32__
@@ -59,6 +64,7 @@ void STDCALL jaspRCPP_init(const char* buildYear, const char* version, RBridgeCa
 	requestTempRootNameCB					= callbacks->requestTempRootNameCB;
 	readDataSetDescriptionCB				= callbacks->readDataSetDescriptionCB;
 	requestStateFileSourceCB				= callbacks->requestStateFileSourceCB;
+	requestJaspResultsFileSourceCB			= callbacks->requestJaspResultsFileSourceCB;
 
 	rInside[".returnString"]				= Rcpp::InternalFunction(&jaspRCPP_returnString);
 	rInside[".callbackNative"]				= Rcpp::InternalFunction(&jaspRCPP_callbackSEXP);
@@ -73,20 +79,31 @@ void STDCALL jaspRCPP_init(const char* buildYear, const char* version, RBridgeCa
 	rInside[".requestTempRootNameNative"]	= Rcpp::InternalFunction(&jaspRCPP_requestTempRootNameSEXP);
 	rInside[".requestStateFileNameNative"]	= Rcpp::InternalFunction(&jaspRCPP_requestStateFileNameSEXP);
 
-	static const char *baseCitationFormat = "JASP Team (%s). JASP (Version %s) [Computer software].";
+
+
+	static const char *baseCitationFormat	= "JASP Team (%s). JASP (Version %s) [Computer software].";
 	char baseCitation[200];
 	sprintf(baseCitation, baseCitationFormat, buildYear, version);
 	rInside[".baseCitation"] = baseCitation;
 
+	jaspResults::setSendFunc(sendToDesktopFunction);
+	jaspResults::setPollMessagesFunc(pollMessagesFunction);
+	jaspTable::setCitation(baseCitation);
+	rInside["jaspResultsModule"]			= givejaspResultsModule();
+
+	rInside.parseEvalQ("source('zzzLoadExtraFunctions.R')"); //File should be next to JAPEngine
+
 	rInside["jasp.analyses"] = Rcpp::List();
 	rInside.parseEvalQNT("suppressPackageStartupMessages(library(\"JASP\"))");
 	rInside.parseEvalQNT("suppressPackageStartupMessages(library(\"methods\"))");
-	
+
 	rinside->parseEvalNT("initEnvironment()");
+
+
 }
 
 
-const char* STDCALL jaspRCPP_run(const char* name, const char* title, bool requiresInit, const char* dataKey, const char* options, const char* resultsMeta, const char* stateKey, const char* perform, int ppi)
+const char* STDCALL jaspRCPP_run(const char* name, const char* title, bool requiresInit, const char* dataKey, const char* options, const char* resultsMeta, const char* stateKey, const char* perform, int ppi, int analysisID, int analysisRevision, bool usesJaspResults)
 {
 	SEXP results;
 
@@ -102,12 +119,28 @@ const char* STDCALL jaspRCPP_run(const char* name, const char* title, bool requi
 	rInside["perform"]		= perform;
 	rInside[".ppi"]			= ppi;
 
-	rInside.parseEval("run(name=name, title=title, requiresInit=requiresInit, dataKey=dataKey, options=options, resultsMeta=resultsMeta, stateKey=stateKey, perform=perform)", results);
+	rinside_consoleLog->clearConsoleBuffer();
+	if(usesJaspResults)
+	{
+		///Some stuff for jaspResults etc
+		jaspResults::setResponseData(analysisID, analysisRevision);
+		jaspResults::setSaveLocation(jaspRCPP_requestJaspResultsRelativeFilePath());
 
-
+		rInside.parseEval("runJaspResults(name=name, title=title, dataKey=dataKey, options=options, stateKey=stateKey)", results);
+	}
+	else
+		rInside.parseEval("run(name=name, title=title, requiresInit=requiresInit, dataKey=dataKey, options=options, resultsMeta=resultsMeta, stateKey=stateKey, perform=perform)", results);
 
 	static string str;
-	str = Rcpp::as<string>(results);
+	if(Rcpp::is<std::string>(results))	str = Rcpp::as<string>(results);
+	else								str = "error!";
+
+	if(usesJaspResults)
+	{
+		std::cout << "result of runJaspResults:\n" << str << std::endl << std::flush;
+		jaspObject::destroyAllAllocatedObjects();
+	}
+
 	return str.c_str();
 }
 
@@ -252,6 +285,17 @@ SEXP jaspRCPP_requestTempRootNameSEXP()
 }
 
 
+const char * jaspRCPP_requestJaspResultsRelativeFilePath()
+{
+	const char* root;
+	const char* relativePath;
+
+	if (!requestJaspResultsFileSourceCB(&root, &relativePath))
+		return "";
+
+	return relativePath;
+}
+
 SEXP jaspRCPP_requestStateFileNameSEXP()
 {
 	const char* root;
@@ -261,8 +305,8 @@ SEXP jaspRCPP_requestStateFileNameSEXP()
 		return R_NilValue;
 
 	Rcpp::List paths;
-	paths["root"] = root;
-	paths["relativePath"] = relativePath;
+	paths["root"]			= root;
+	paths["relativePath"]	= relativePath;
 
 	return paths;
 }
