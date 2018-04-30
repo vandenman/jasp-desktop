@@ -154,6 +154,7 @@ OTHER_FILES  += \
 	JASP/R/regressionloglinear.R \
 	JASP/R/regressionloglinearbayesian.R \
 	JASP/R/reliabilityanalysis.R \
+	JASP/R/reliabilityanalysisbayesian.R \
 	JASP/R/semsimple.R \
 	JASP/R/summarystatsbinomialtestbayesian.R \
 	JASP/R/summarystatscorrelationbayesianpairs.R \

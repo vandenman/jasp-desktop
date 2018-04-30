@@ -45,6 +45,7 @@
 #include "analysisforms/Common/regressionloglinearbayesianform.h"
 #include "analysisforms/Common/regressionloglinearform.h"
 #include "analysisforms/Common/reliabilityanalysisform.h"
+#include "analysisforms/Common/reliabilityanalysisbayesianform.h"
 #include "analysisforms/Common/ttestbayesianindependentsamplesform.h"
 #include "analysisforms/Common/ttestbayesianonesampleform.h"
 #include "analysisforms/Common/ttestbayesianpairedsamplesform.h"
@@ -824,6 +825,7 @@ AnalysisForm* MainWindow::loadForm(const string name)
 	else if (name == "ReinforcementLearningR11tLearning")			form = new ReinforcementLearningR11tLearningForm(contentArea);
 	else if (name == "SummaryStatsBinomialTestBayesian")			form = new SummaryStatsBinomialTestBayesianForm(contentArea);
 	else if (name == "AnovaRepeatedMeasuresBayesian")				form = new AnovaRepeatedMeasuresBayesianForm(contentArea);
+    else if (name == "ReliabilityAnalysisBayesian")                 form = new ReliabilityAnalysisBayesianForm(contentArea);
 	else if (name == "TTestBayesianPairedSamples")					form = new TTestBayesianPairedSamplesForm(contentArea);
 	else if (name == "ContingencyTablesBayesian")					form = new ContingencyTablesBayesianForm(contentArea);
 	else if (name == "RegressionLinearBayesian")					form = new RegressionLinearBayesianForm(contentArea);
