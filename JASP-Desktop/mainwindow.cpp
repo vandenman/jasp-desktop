@@ -45,6 +45,7 @@
 #include "analysisforms/Common/regressionloglinearbayesianform.h"
 #include "analysisforms/Common/regressionloglinearform.h"
 #include "analysisforms/Common/reliabilityanalysisform.h"
+#include "analysisforms/Common/reliabilityanalysisbayesianform.h"
 #include "analysisforms/Common/ttestbayesianindependentsamplesform.h"
 #include "analysisforms/Common/ttestbayesianonesampleform.h"
 #include "analysisforms/Common/ttestbayesianpairedsamplesform.h"
@@ -804,6 +805,8 @@ AnalysisForm* MainWindow::loadForm(const string name)
 		form = new BinomialTestBayesianForm(contentArea);
 	else if (name == "ReliabilityAnalysis")
 		form = new ReliabilityAnalysisForm(contentArea);
+    else if (name == "ReliabilityAnalysisBayesian")
+		form = new ReliabilityAnalysisBayesianForm(contentArea);    
 	else if (name == "ExploratoryFactorAnalysis")
 		form = new ExploratoryFactorAnalysisForm(contentArea);
 	else if (name == "PrincipalComponentAnalysis")

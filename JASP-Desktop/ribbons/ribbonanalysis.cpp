@@ -43,6 +43,9 @@ RibbonAnalysis::RibbonAnalysis(QWidget *parent) :
 	menu->addAction(QString("Descriptive Statistics"), this, SLOT(itemSelected()))->setObjectName("Descriptives");
 	menu->addAction(QString("Reliability Analysis"), this, SLOT(itemSelected()))->setObjectName("ReliabilityAnalysis");
 
+    menu->addSeparator();
+    menu->addAction(QString("Bayesian Reliability Analysis"), this, SLOT(itemSelected()))->setObjectName("ReliabilityAnalysisBayesian");
+    
 	ui->Descriptives->setMenu(menu);
 
 	menu = new QMenu(this);

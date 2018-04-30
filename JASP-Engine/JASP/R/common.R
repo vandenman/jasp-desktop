@@ -177,13 +177,13 @@ runJaspResults <- function(name, title, dataKey, options, stateKey)
 {
 	if (identical(.Platform$OS.type, "windows"))
 		compiler::enableJIT(0)
-		
+	
   jaspResults <- jaspResultsModule$create_jaspResults(name)
   jaspResults$setOptions(options)
 
   dataKey     <- rjson::fromJSON(dataKey)
   options     <- rjson::fromJSON(options)
-  resultsMeta <- rjson::fromJSON(resultsMeta)
+  # resultsMeta <- rjson::fromJSON(resultsMeta)
   stateKey    <- rjson::fromJSON(stateKey)
 
   if (base::exists(".requestStateFileNameNative")) {
