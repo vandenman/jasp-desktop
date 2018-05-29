@@ -39,6 +39,17 @@
 			"default" : false
     },
     {
+        "name": "ICCScale",
+        "type": "Boolean",
+        "default" : false
+    },
+    {
+        "name": "sumOfSquares",
+        "options": [ "type1", "type2", "type3" ],
+        "default": "type3",
+        "type": "List"
+    },
+    {
     	"name": "meanScale",
     	"type": "Boolean",
 			"default" : false
