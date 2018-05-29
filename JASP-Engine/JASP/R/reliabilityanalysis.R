@@ -55,7 +55,8 @@ ReliabilityAnalysis <- function(dataset = NULL, options, perform = "run",
 	results[["title"]] <- "Reliability Analysis"
 
 	meta <- list(list(name="reliabilityScale", type="table"),
-				 list(name="reliabilityItemsObj", type="object", meta=list(list(name="reliabilityItems", type="table"))))
+				 list(name="reliabilityItemsObj", type="object", meta=list(list(name="reliabilityItems", type="table"))),
+				 list(name="reliabilityICC", type="table"))
 
 	results[[".meta"]] <- meta
 
@@ -93,6 +94,9 @@ ReliabilityAnalysis <- function(dataset = NULL, options, perform = "run",
 		results[["reliabilityItemsObj"]] <- NULL
 	}
 
+	if (options[["ICCScale"]])
+	    results[["reliabilityICC"]] <- .reliabilityICCTable(resultsAlpha, dataset, options, variables, perform)
+
 	# Save state
 
 	state[["options"]] <- options
@@ -116,6 +120,12 @@ ReliabilityAnalysis <- function(dataset = NULL, options, perform = "run",
 	relyFit <- NULL
 
 	if (perform == "run" && !is.null(variables) && length(variables) > 1) {
+
+		if (options[["missingValues"]] == "excludeCasesListwise") {
+
+		    dataset <- dataset[complete.cases(dataset), ]
+
+		}
 
 		# obtain smoothed correlation and covariance matrix
 		dataList <- .reliabilityConvertDataToCorrelation(dataset, options)
@@ -174,6 +184,8 @@ ReliabilityAnalysis <- function(dataset = NULL, options, perform = "run",
 		relyFit[["omega"]] <- omega
 		relyFit[["omegaDropped"]] <- omegaDropped
 
+		relyFit[["ICC"]] <- psych::ICC(dataset, missing = TRUE, lmer = TRUE)
+
 	}
 
 	return(relyFit)
@@ -186,7 +198,7 @@ ReliabilityAnalysis <- function(dataset = NULL, options, perform = "run",
 
 	table[["title"]] <- "Scale Reliability Statistics"
 
-	fields = list(list(name="case", title="", type="string"))
+	fields <- list(list(name="case", title="", type="string"))
 
 	if (options$meanScale)
 		fields[[length(fields) + 1]] <- list(name="mu", title="mean", type="number", format="sf:4;dp:3")
@@ -432,6 +444,40 @@ ReliabilityAnalysis <- function(dataset = NULL, options, perform = "run",
 
 }
 
+.reliabilityICCTable <- function (r, dataset, options, variables, perform) {
+
+	table <- list(
+	    title = "Intraclass Correlations",
+	    schema = list(fields = list(
+	        list(name = "what",  title = "",      type = "string"),
+	        list(name = "type",  title = "Type",  type = "string"),
+	        list(name = "icc",   title = "ICC",   type = "number",  format = "sf:4;dp:3"),
+	        list(name = "Fstat", title = "F",     type = "number",  format = "sf:4;dp:3"),
+	        list(name = "df1",   title = "df1",   type = "integer", format = "sf:4;dp:3"),
+	        list(name = "df2",   title = "df2",   type = "integer", format = "sf:4;dp:3"),
+	        list(name = "pval",  title = "p",     type = "number",  format = "dp:3;p:.001"),
+	        list(name = "lower", title = "Lower", type = "number",  format = "sf:4;dp:3", overTitle = "95% Confidence Interval"),
+	        list(name = "upper", title = "Upper", type = "number",  format = "sf:4;dp:3", overTitle = "95% Confidence Interval")
+	    ))
+	)
+
+	if (!is.null(r)) {
+
+	    tb <- r[["ICC"]][["results"]]
+	    # hardcoded since this never changes
+	    rmns <- c("Single raters absolute", "Single random raters", "Single fixed raters", 
+	              "Average raters absolute", "Average random raters", "Average fixed raters")
+	    tb <- cbind(rmns, tb)
+	    rownames(tb) <- NULL
+	    colnames(tb) <- c("what", "type", "icc", "Fstat", "df1", "df2", "pval", "lower", "upper")
+	    data <- .TBcolumns2TBrows(tb) # source in networkanalysis.R
+    	table[["data"]] <- data
+	}
+
+	return(table)
+
+}
+
 .reliabilityAlphaCI <- function(relyFit, ci, nullAlpha = 0) {
 
 	# code taken and modified from http://www.psyctc.org/stats/R/Feldt1.html
@@ -469,12 +515,6 @@ ReliabilityAnalysis <- function(dataset = NULL, options, perform = "run",
 }
 
 .reliabilityConvertDataToCorrelation <- function(dataset, options) {
-	
-	if (options[["missingValues"]] == "excludeCasesListwise") {
-		
-		dataset <- dataset[complete.cases(dataset), ]
-		
-	}
 	
 	means = colMeans(dataset, na.rm = TRUE)
 	covmat <- stats::cov(dataset, use = "pairwise")

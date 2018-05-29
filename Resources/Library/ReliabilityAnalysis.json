@@ -44,9 +44,9 @@
         "default" : false
     },
     {
-        "name": "sumOfSquares",
-        "options": [ "type1", "type2", "type3" ],
-        "default": "type3",
+        "name": "ICCtype",
+        "options": [ "ICC1", "ICC2", "ICC3", "ICC1k", "ICC2k", "ICC3k" ],
+        "default": "ICC1",
         "type": "List"
     },
     {

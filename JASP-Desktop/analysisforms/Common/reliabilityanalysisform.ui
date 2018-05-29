@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>638</width>
-    <height>1062</height>
+    <width>679</width>
+    <height>1083</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -117,128 +117,6 @@
          <bool>false</bool>
         </property>
         <layout class="QGridLayout" name="gridLayout">
-         <item row="6" column="2">
-          <widget class="QWidget" name="ICCContainer" native="true">
-           <layout class="QHBoxLayout" name="horizontalLayout_3">
-            <property name="leftMargin">
-             <number>0</number>
-            </property>
-            <item>
-             <widget class="BoundComboBox" name="ICC">
-              <item>
-               <property name="text">
-                <string>ICC1</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>ICC2</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>ICC3</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>ICC1k</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>ICC2k</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>ICC3k</string>
-               </property>
-              </item>
-             </widget>
-            </item>
-           </layout>
-          </widget>
-         </item>
-         <item row="0" column="1" colspan="2">
-          <widget class="BoundCheckBox" name="mcDonaldScale">
-           <property name="text">
-            <string>McDonald's ω</string>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="1" colspan="2">
-          <widget class="BoundCheckBox" name="alphaScale">
-           <property name="text">
-            <string>Cronbach's α</string>
-           </property>
-          </widget>
-         </item>
-         <item row="3" column="1" colspan="2">
-          <widget class="BoundCheckBox" name="gutmannScale">
-           <property name="text">
-            <string>Gutmann's λ6</string>
-           </property>
-          </widget>
-         </item>
-         <item row="4" column="1" colspan="2">
-          <widget class="BoundCheckBox" name="glbScale">
-           <property name="text">
-            <string>Greatest lower bound</string>
-           </property>
-          </widget>
-         </item>
-         <item row="6" column="1">
-          <widget class="BoundCheckBox" name="ICC_2">
-           <property name="text">
-            <string>Intraclass correlations</string>
-           </property>
-          </widget>
-         </item>
-         <item row="5" column="1" colspan="2">
-          <widget class="BoundCheckBox" name="averageInterItemCor">
-           <property name="text">
-            <string>Average interitem correlation</string>
-           </property>
-          </widget>
-         </item>
-         <item row="10" column="1" colspan="2">
-          <widget class="BoundCheckBox" name="sdScale">
-           <property name="text">
-            <string>Standard deviation</string>
-           </property>
-          </widget>
-         </item>
-         <item row="9" column="1" colspan="2">
-          <widget class="BoundCheckBox" name="meanScale">
-           <property name="text">
-            <string>Mean</string>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="3">
-          <spacer name="horizontalSpacer_3">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item row="2" column="1">
-          <widget class="QWidget" name="widget_6" native="true">
-           <property name="maximumSize">
-            <size>
-             <width>16</width>
-             <height>16777215</height>
-            </size>
-           </property>
-          </widget>
-         </item>
          <item row="2" column="2">
           <widget class="BoundGroupBox" name="alphaScaleStandardized">
            <property name="enabled">
@@ -292,6 +170,72 @@
              </widget>
             </item>
            </layout>
+          </widget>
+         </item>
+         <item row="1" column="1" colspan="3">
+          <widget class="BoundCheckBox" name="alphaScale">
+           <property name="text">
+            <string>Cronbach's α</string>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="1" colspan="3">
+          <widget class="BoundCheckBox" name="glbScale">
+           <property name="text">
+            <string>Greatest lower bound</string>
+           </property>
+          </widget>
+         </item>
+         <item row="6" column="1">
+          <widget class="BoundCheckBox" name="ICCScale">
+           <property name="text">
+            <string>Intraclass correlations</string>
+           </property>
+          </widget>
+         </item>
+         <item row="5" column="1" colspan="3">
+          <widget class="BoundCheckBox" name="averageInterItemCor">
+           <property name="text">
+            <string>Average interitem correlation</string>
+           </property>
+          </widget>
+         </item>
+         <item row="10" column="1" colspan="3">
+          <widget class="BoundCheckBox" name="sdScale">
+           <property name="text">
+            <string>Standard deviation</string>
+           </property>
+          </widget>
+         </item>
+         <item row="9" column="1" colspan="3">
+          <widget class="BoundCheckBox" name="meanScale">
+           <property name="text">
+            <string>Mean</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="1">
+          <widget class="QWidget" name="widget_6" native="true">
+           <property name="maximumSize">
+            <size>
+             <width>16</width>
+             <height>16777215</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1" colspan="3">
+          <widget class="BoundCheckBox" name="mcDonaldScale">
+           <property name="text">
+            <string>McDonald's ω</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="1" colspan="3">
+          <widget class="BoundCheckBox" name="gutmannScale">
+           <property name="text">
+            <string>Gutmann's λ6</string>
+           </property>
           </widget>
          </item>
         </layout>
@@ -695,11 +639,6 @@
    <class>BoundTextBox</class>
    <extends>QLineEdit</extends>
    <header>widgets/boundtextbox.h</header>
-  </customwidget>
-  <customwidget>
-   <class>BoundComboBox</class>
-   <extends>QComboBox</extends>
-   <header>widgets/boundcombobox.h</header>
   </customwidget>
  </customwidgets>
  <tabstops>
