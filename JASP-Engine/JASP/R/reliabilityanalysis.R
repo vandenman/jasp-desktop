@@ -461,18 +461,20 @@ ReliabilityAnalysis <- function(dataset = NULL, options, perform = "run",
 	    ))
 	)
 
-	if (!is.null(r)) {
 
+	if (!is.null(r)) {
 	    tb <- r[["ICC"]][["results"]]
-	    # hardcoded since this never changes
-	    rmns <- c("Single raters absolute", "Single random raters", "Single fixed raters", 
-	              "Average raters absolute", "Average random raters", "Average fixed raters")
-	    tb <- cbind(rmns, tb)
-	    rownames(tb) <- NULL
-	    colnames(tb) <- c("what", "type", "icc", "Fstat", "df1", "df2", "pval", "lower", "upper")
-	    data <- .TBcolumns2TBrows(tb) # source in networkanalysis.R
-    	table[["data"]] <- data
+	} else {
+		tb <- as.data.frame(matrix(".", 6, 8))
 	}
+
+	# hardcoded since it should never change
+	rmns <- c("Single raters absolute", "Single random raters", "Single fixed raters",
+			  "Average raters absolute", "Average random raters", "Average fixed raters")
+	tb <- cbind(rmns, tb)
+	rownames(tb) <- NULL
+	colnames(tb) <- c("what", "type", "icc", "Fstat", "df1", "df2", "pval", "lower", "upper")
+	table[["data"]] <- .TBcolumns2TBrows(tb) # source in networkanalysis.R
 
 	return(table)
 
