@@ -45,3 +45,26 @@ test_that("Item Statistics table matches", {
          1.05841360919316)
   )
 })
+
+test_that("ICC table matches", {
+	options <- jasptools::analysisOptions("ReliabilityAnalysis")
+	options$variables <- c("contcor1", "contcor2", "contNormal")
+	options$ICCScale <- TRUE
+	results <- jasptools::run("ReliabilityAnalysis", "test.csv", options, view=FALSE, quiet=TRUE)
+	table <- results[["results"]][["reliabilityICC"]][["data"]]
+	expect_equal_tables(table,
+						list("Single raters absolute", "ICC1", 0.270736580074761, 2.11373986138993,
+							 99, 200, 4.15511641435793e-06, 0.146823863872799, 0.400742095405812,
+							 "Single random raters", "ICC2", 0.273772630694275, 2.15072767362195,
+							 99, 198, 2.66481826493225e-06, 0.15092759374215, 0.402827483048287,
+							 "Single fixed raters", "ICC3", 0.277235165519258, 2.15072767362195,
+							 99, 198, 2.66481826493225e-06, 0.152965433244052, 0.407143912164826,
+							 "Average raters absolute", "ICC1k", 0.526904886326726, 2.11373986138993,
+							 99, 200, 4.15511641435793e-06, 0.340488049544983, 0.66735322593966,
+							 "Average random raters", "ICC2k", 0.53072301830183, 2.15072767362195,
+							 99, 198, 2.66481826493225e-06, 0.347798115780762, 0.669276507325944,
+							 "Average fixed raters", "ICC3k", 0.535041087598067, 2.15072767362195,
+							 99, 198, 2.66481826493225e-06, 0.351394022078838, 0.67322930800452)
+	)
+})
+

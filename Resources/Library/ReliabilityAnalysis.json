@@ -44,12 +44,6 @@
         "default" : false
     },
     {
-        "name": "ICCtype",
-        "options": [ "ICC1", "ICC2", "ICC3", "ICC1k", "ICC2k", "ICC3k" ],
-        "default": "ICC1",
-        "type": "List"
-    },
-    {
     	"name": "meanScale",
     	"type": "Boolean",
 			"default" : false

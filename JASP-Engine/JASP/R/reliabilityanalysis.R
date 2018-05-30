@@ -126,11 +126,6 @@ ReliabilityAnalysis <- function(dataset = NULL, options, perform = "run",
 		    dataset <- dataset[complete.cases(dataset), ]
 
 		}
-
-		# obtain smoothed correlation and covariance matrix
-		dataList <- .reliabilityConvertDataToCorrelation(dataset, options)
-		nObs <- nrow(dataset)
-		nVar <- ncol(dataset)
 		
 		# generate key for reverse scaled items
 		key <- NULL
@@ -139,7 +134,20 @@ ReliabilityAnalysis <- function(dataset = NULL, options, perform = "run",
 			key <- rep(1, length(variables))
 			key[match(.v(unlist(options[["reverseScaledItems"]])), colnames(dataset))] <- -1
 
+			if (any(key < 0)) {
+				min.item <- min(dataset, na.rm = TRUE)
+				max.item <- max(dataset, na.rm = TRUE)
+				adjust <- max.item + min.item
+				flip.these <- key < 0
+				dataset[, flip.these] <- adjust - dataset[, flip.these]
+			}
+			key <- rep(1, length(variables))
 		}
+
+		# obtain smoothed correlation and covariance matrix
+		dataList <- .reliabilityConvertDataToCorrelation(dataset, options)
+		nObs <- nrow(dataset)
+		nVar <- ncol(dataset)
 
 		# calculate chronbach alpha, gutmanns lambda6, and average inter item corrrelation
 		relyFit <- .quietDuringUnitTest(psych::alpha(dataList[["covariance"]], key = key))
