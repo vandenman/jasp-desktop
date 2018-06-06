@@ -18,13 +18,6 @@ public:
 #endif
 	}
 
-	~jaspContainer()
-	{
-		for(auto & d : _data)
-			delete d.second;
-		_data.clear();
-	}
-
 	jaspContainer(const jaspContainer& that) = delete;
 
 	std::string dataToString(std::string prefix = "") override;
@@ -67,4 +60,4 @@ public:
 	void			insert(std::string field, Rcpp::RObject value)	{ ((jaspContainer*)myJaspObject)->insert(field, value); }
 };
 
-RCPP_EXPOSED_CLASS(jaspContainer_Interface)
+RCPP_EXPOSED_CLASS_NODECL(jaspContainer_Interface)

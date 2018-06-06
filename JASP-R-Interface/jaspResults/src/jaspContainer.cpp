@@ -223,10 +223,7 @@ void jaspContainer::checkDependenciesChildren(Json::Value currentOptions)
 	std::vector<std::string> removeThese;
 	for(auto & d : _data)
 		if(!d.second->checkDependencies(currentOptions))
-		{
-			delete d.second;
 			removeThese.push_back(d.first);
-		}
 
 	for(auto & removeThis : removeThese)
 		_data.erase(removeThis);

@@ -2789,11 +2789,13 @@ editImage <- function(plotName, type, height, width) {
 ###########################
 ## JASP Results Wrappers ##
 ###########################
+# should define the same functions as those in zzzWrappers.R in jaspResults package.
+# with the difference that here they should directly point to jaspResultsModule
 
 # if title is left unset (aka "") then, when added to a container/results, it will take the fieldname as title.
 # width and height should be set to some global default setting and only in exceptional cases manually. Maybe we could take it from JASPplot?
 # aspectRatio of > 0 sets height to width * aspectRatio.
-jaspPlot <- function(plot=NULL, title="", width=320, height=320, aspectRatio=0, error=NULL, errorMessage="", dependencies=NULL)
+getJaspPlot <- function(plot=NULL, title="", width=320, height=320, aspectRatio=0, error=NULL, errorMessage="", dependencies=NULL)
 {
   jaspPlotObj  <- jaspResultsModule$create_jaspPlot(title) # If we use R's constructor it will garbage collect our objects prematurely.. #new(jaspResultsModule$jaspPlot, title)
 
@@ -2831,12 +2833,12 @@ jaspPlot <- function(plot=NULL, title="", width=320, height=320, aspectRatio=0, 
   return(jaspPlotObj)
 }
 
-jaspContainer <- function(title="")
+getJaspContainer <- function(title="")
 {
   return(jaspResultsModule$create_jaspContainer(title)) # If we use R's constructor it will garbage collect our objects prematurely.. #new(jaspResultsModule$jaspContainer, title))
 }
 
-jaspTable <- function(title="", data=NULL, colNames=NULL, colTitles=NULL, colFormats=NULL, rowNames=NULL, rowTitles=NULL)
+getJaspTable <- function(title="", data=NULL, colNames=NULL, colTitles=NULL, colFormats=NULL, rowNames=NULL, rowTitles=NULL)
 {
   jaspObj <- jaspResultsModule$create_jaspTable(title) # If we use R's constructor it will garbage collect our objects prematurely.. #new(jaspResultsModule$jaspTable, title)
 
@@ -2861,7 +2863,7 @@ jaspTable <- function(title="", data=NULL, colNames=NULL, colTitles=NULL, colFor
   return(jaspObj)
 }
 
-jaspHtml <- function(text="", elementType="p")
+getJaspHtml <- function(text="", elementType="p")
 {
   #return(new(jaspResultsModule$jaspHtml, text, elementType))
   htmlObj <- jaspResultsModule$create_jaspHtml(text) # If we use R's constructor it will garbage collect our objects prematurely.. #

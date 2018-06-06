@@ -15,7 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-# NB: this file has custom code folding enabled. If you're in atom, install the 
+# NB: this file has custom code folding enabled. If you're in atom, install the
 # "custom-folds" package. In other editors you might be able to define
 # the <editor-fold> and </editor-fold> as start- and endpoints of a code fold.
 
@@ -24,6 +24,10 @@ Descriptives <- function(jaspResults, dataset, options, state=NULL)
   variables <- unlist(options$variables)
   splitName <- options$splitby
   makeSplit <- splitName != ""
+
+  taf <- getJaspTable()
+  taf$addColumns(list(a=list(1,2,34,45,65,6,6,5)))
+  taf$print()
 
   if(is.null(state))
     state <- list()
@@ -58,7 +62,7 @@ Descriptives <- function(jaspResults, dataset, options, state=NULL)
   {
     if(is.null(jaspResults[["tables"]]))
     {
-      jaspResults[["tables"]] <- jaspContainer("Frequency Tables")
+      jaspResults[["tables"]] <- getJaspContainer("Frequency Tables")
       jaspResults[["tables"]]$dependOnTheseOptions(c("frequencyTables", "splitby"))
     }
 
@@ -66,7 +70,7 @@ Descriptives <- function(jaspResults, dataset, options, state=NULL)
 
     if (jaspResults[["tables"]]$length > 0 && is.null(jaspResults[["frequenciesHeading"]]))
     {
-      jaspResults[["frequenciesHeading"]] <- jaspHtml("Frequencies", "h1")
+      jaspResults[["frequenciesHeading"]] <- getJaspHtml("Frequencies", "h1")
       jaspResults[["frequenciesHeading"]]$copyDependenciesFromJaspObject(jaspResults[["tables"]])
       jaspResults[["frequenciesHeading"]]$dependOnTheseOptions("variables")
     }
@@ -81,7 +85,7 @@ Descriptives <- function(jaspResults, dataset, options, state=NULL)
     {
       if (makeSplit)
       {
-        jaspResults[["matrixPlot"]] <- jaspContainer(title="Correlation plots")
+        jaspResults[["matrixPlot"]] <- getJaspContainer(title="Correlation plots")
         corrPlot <- jaspResults[["matrixPlot"]]
         corrPlot$dependOnTheseOptions(c("plotCorrelationMatrix", "splitby"))
 
@@ -99,7 +103,7 @@ Descriptives <- function(jaspResults, dataset, options, state=NULL)
   {
     if(is.null(jaspResults[["distributionPlots"]]))
     {
-      jaspResults[["distributionPlots"]] <- jaspContainer("Distribution Plots")
+      jaspResults[["distributionPlots"]] <- getJaspContainer("Distribution Plots")
       jaspResults[["distributionPlots"]]$dependOnTheseOptions(c("plotVariables", "splitby"))
     }
 
@@ -122,9 +126,10 @@ Descriptives <- function(jaspResults, dataset, options, state=NULL)
   {
     if(is.null(jaspResults[["splitPlots"]]))
     {
-      jaspResults[["splitPlots"]] <- jaspContainer("Boxplots")
+      jaspResults[["splitPlots"]] <- getJaspContainer("Boxplots")
       jaspResults[["splitPlots"]]$dependOnTheseOptions(c("splitPlots", "splitby"))
     }
+
     splitPlots <- jaspResults[["splitPlots"]]
 
     for (var in variables)
@@ -153,7 +158,7 @@ Descriptives <- function(jaspResults, dataset, options, state=NULL)
   variables               <- unlist(options$variables)
   equalGroupsNo           <- options$percentileValuesEqualGroupsNo
   percentilesPercentiles  <- unique(options$percentileValuesPercentilesPercentiles)
-  stats                   <- jaspTable("Descriptive Statistics")
+  stats                   <- getJaspTable("Descriptive Statistics")
   jaspResults[["stats"]]  <- stats
   stats$transpose         <- TRUE
 
@@ -220,7 +225,7 @@ Descriptives <- function(jaspResults, dataset, options, state=NULL)
         shouldAddNominalTextFootnote      <- subReturn$shouldAddNominalTextFootnote
         shouldAddModeMoreThanOnceFootnote <- subReturn$shouldAddModeMoreThanOnceFootnote
 
-        stats$addRow(subReturn$resultsCol)
+        stats$addRows(subReturn$resultsCol)
       }
 
   }
@@ -234,7 +239,7 @@ Descriptives <- function(jaspResults, dataset, options, state=NULL)
       shouldAddNominalTextFootnote      <- subReturn$shouldAddNominalTextFootnote
       shouldAddModeMoreThanOnceFootnote <- subReturn$shouldAddModeMoreThanOnceFootnote
 
-      stats$addRow(subReturn$resultsCol)
+      stats$addRows(subReturn$resultsCol)
     }
   }
 
@@ -278,7 +283,7 @@ Descriptives <- function(jaspResults, dataset, options, state=NULL)
 
   if (options$mode)
   {
-    
+
     if (base::is.factor(na.omitted) == FALSE)
     {
         mode <- as.numeric(names(table(na.omitted)[table(na.omitted)==max(table(na.omitted))]))
@@ -369,15 +374,15 @@ Descriptives <- function(jaspResults, dataset, options, state=NULL)
   wantsSplit  <- splitName!=""
   splitFactor <- dataset[[.v(splitName)]]
   splitLevels <- levels(splitFactor)
-  
+
   for (variable in options$variables)
   {
-    
+
     column <- dataset[[.v(variable)]]
     if (!is.factor(column)){
       next
     }
-    
+
     #if (variable %in% names(stateTabs) &&
     #  "data" %in% names(stateTabs[[variable]])) {
     #  freqTabs[[length(freqTabs) + 1]] <- stateTabs[[variable]]
@@ -388,7 +393,7 @@ Descriptives <- function(jaspResults, dataset, options, state=NULL)
     if(!is.null(freqTabs[[variable]]))
       next
 
-    freqTabs[[variable]] <- jaspTable(paste("Frequencies for", variable))
+    freqTabs[[variable]] <- getJaspTable(paste("Frequencies for", variable))
 
     freqTab <- freqTabs[[variable]]
     freqTab$setOptionMustContainDependency("variables", variable)
@@ -400,7 +405,7 @@ Descriptives <- function(jaspResults, dataset, options, state=NULL)
     freqTab$addColumnInfo(name="Percent",             type="number", format="dp:1")
     freqTab$addColumnInfo(name="Valid Percent",       type="number", format="dp:1")
     freqTab$addColumnInfo(name="Cumulative Percent",  type="number", format="dp:1")
-        
+
     rows <- list()
 
     if (wantsSplit)
@@ -489,13 +494,13 @@ Descriptives <- function(jaspResults, dataset, options, state=NULL)
 {
   variables <- unlist(options$variables)
   l         <- length(variables)
-  depends   <- c("variables", "splitBy")
+  depends   <- c("plotCorrelationMatrix", "variables", "splitBy")
 
   if (l == 0) #Nothing to plot I guess?
     return(NULL)
 
   if (nrow(dataset) < 3)
-    return(jaspPlot(error="badData", errorMessage="Plotting is not possible: Too few rows", dependencies=depends))
+    return(getJaspPlot(error="badData", errorMessage="Plotting is not possible: Too few rows", dependencies=depends))
 
   # check variables
   d         <- vector("character",  length(.v(variables)))
@@ -572,7 +577,7 @@ Descriptives <- function(jaspResults, dataset, options, state=NULL)
     }
   }
 
-  return(jaspPlot(plot=.matrixPlotFunc, width=250 * l + 20, aspectRatio=1, title=name, dependencies=depends))
+  return(getJaspPlot(plot=.matrixPlotFunc, width=250 * l + 20, aspectRatio=1, title=name, dependencies=depends))
 }
 
 .descriptivesFrequencyPlots <- function(dataset, options, variable)
@@ -583,7 +588,7 @@ Descriptives <- function(jaspResults, dataset, options, state=NULL)
     # return a collection
     split <- names(dataset)
 
-    plotResult <- jaspContainer(title=variable)
+    plotResult <- getJaspContainer(title=variable)
     plotResult$setOptionMustContainDependency("variables",  variable)
     plotResult$setOptionMustBeDependency("splitBy",         options$splitBy)
 
@@ -607,8 +612,8 @@ Descriptives <- function(jaspResults, dataset, options, state=NULL)
 
 .descriptivesFrequencyPlots_SubFunc <- function(column, variable, width, height)
 {
-  if (any(is.infinite(column)))   return(jaspPlot(plot=function() { .barplotJASP(variable=variable, dontPlotData=TRUE) }, title=variable, width=width, height=height, error="badData", errorMessage="Plotting is not possible: Variable contains infinity"))
-  else if (length(column) < 3)    return(jaspPlot(plot=function() { .barplotJASP(variable=variable, dontPlotData=TRUE) }, title=variable, width=width, height=height, error="badData", errorMessage="Plotting is not possible: Too few rows (left)"))
+  if (any(is.infinite(column)))   return(getJaspPlot(plot=function() { .barplotJASP(variable=variable, dontPlotData=TRUE) }, title=variable, width=width, height=height, error="badData", errorMessage="Plotting is not possible: Variable contains infinity"))
+  else if (length(column) < 3)    return(getJaspPlot(plot=function() { .barplotJASP(variable=variable, dontPlotData=TRUE) }, title=variable, width=width, height=height, error="badData", errorMessage="Plotting is not possible: Too few rows (left)"))
   else if (
     (length(column) > 0 && is.factor(column)) ||
     (is.numeric(column) && all(!is.na(column) & (column %% 1 == 0)) && length(unique(column)) <= 24)
@@ -617,10 +622,10 @@ Descriptives <- function(jaspResults, dataset, options, state=NULL)
     if (!is.factor(column))
       column <- as.factor(column)
 
-    return(jaspPlot(plot=function() { .barplotJASP(column, variable) }, title=variable, width=width, height=height))
+    return(getJaspPlot(plot=function() { .barplotJASP(column, variable) }, title=variable, width=width, height=height))
   }
   else if (length(column) > 0 && !is.factor(column))
-    return(jaspPlot(plot=function() { .plotMarginal(column, variableName=variable) }, title=variable, width=width, height=height))
+    return(getJaspPlot(plot=function() { .plotMarginal(column, variableName=variable) }, title=variable, width=width, height=height))
 }
 
 .descriptivesSplitPlot <- function(dataset, options,  variable)
@@ -665,11 +670,11 @@ Descriptives <- function(jaspResults, dataset, options, state=NULL)
 
 
   if (!is.numeric(y))
-    return(jaspPlot(plot=.initSplitPlot, title=variable, width=options$plotWidth, height=options$plotHeight, error="badData", errorMessage="Plotting is not possible: Variable is not numeric!", dependencies=depends))
+    return(getJaspPlot(plot=.initSplitPlot, title=variable, width=options$plotWidth, height=options$plotHeight, error="badData", errorMessage="Plotting is not possible: Variable is not numeric!", dependencies=depends))
   if (length(y) == 0)
-     return(jaspPlot(plot=.initSplitPlot, title=variable, width=options$plotWidth, height=options$plotHeight, error="badData", errorMessage="Plotting is not possible: Variable only contains NA!", dependencies=depends))
+     return(getJaspPlot(plot=.initSplitPlot, title=variable, width=options$plotWidth, height=options$plotHeight, error="badData", errorMessage="Plotting is not possible: Variable only contains NA!", dependencies=depends))
   else if (!(options$splitPlotViolin || options$splitPlotBoxplot || options$splitPlotJitter))
-    return(jaspPlot(plot=.initSplitPlot, title=variable, width=options$plotWidth, height=options$plotHeight, error="badData", errorMessage="Plotting is not possible: No plot type selected!", dependencies=depends))
+    return(getJaspPlot(plot=.initSplitPlot, title=variable, width=options$plotWidth, height=options$plotHeight, error="badData", errorMessage="Plotting is not possible: No plot type selected!", dependencies=depends))
   else
   {
     if (is.null(dataset[[.v(options$splitby)]])){
@@ -737,16 +742,9 @@ Descriptives <- function(jaspResults, dataset, options, state=NULL)
     else if (options$splitPlotJitter)
       p <- p + ggplot2::geom_jitter(size = 2.5, ggplot2::aes(colour = group), position = ggplot2::position_jitter(width=0.1, height = 0))
 
-    } else if (options$splitPlotJitter){
-
-      p <- p + ggplot2::geom_jitter(size = 2.5, ggplot2::aes(colour = group),
-                                    position = ggplot2::position_jitter(width=0.1, height = 0))
-
-    }
-
-    if (options$splitPlotOutlierLabel && (options$splitPlotBoxplot || options$splitPlotJitter)){
+    if (options$splitPlotOutlierLabel && (options$splitPlotBoxplot || options$splitPlotJitter))
       p <- p + ggrepel::geom_text_repel(ggplot2::aes(label=label), hjust=-0.3)
-    }
+
 
     ### Theming & Cleaning
     p <- p +
@@ -774,7 +772,7 @@ Descriptives <- function(jaspResults, dataset, options, state=NULL)
         plot.margin=        grid::unit(c(0.1, 0.1, 0.6, 0.6), "cm"),
         legend.position=    "none")
 
-    return(jaspPlot(plot=p, title=variable, width=options$plotWidth, height=options$plotHeight, dependencies=depends))
+    return(getJaspPlot(plot=p, title=variable, width=options$plotWidth, height=options$plotHeight, dependencies=depends))
   }
 }
 
@@ -782,9 +780,9 @@ Descriptives <- function(jaspResults, dataset, options, state=NULL)
 # <editor-fold> HELPER FUNCTIONS BLOCK ----
 
 .plotMarginal <- function(variable, variableName, cexYlab= 1.3, lwd= 2, rugs= FALSE){
-  
+
   variable <- na.omit(variable)
-  
+
   par(mar= c(5, 4.5, 4, 2) + 0.1)
 
   density <- density(variable)
@@ -879,23 +877,23 @@ Descriptives <- function(jaspResults, dataset, options, state=NULL)
   xVar  <- d$xx
   yVar  <- d$yy
 
-	# fit different types of regression
-	fit <- vector("list", 1)# vector("list", 4)
+  # fit different types of regression
+  fit <- vector("list", 1)# vector("list", 4)
 
-	fit[[1]] <- lm(yy ~ poly(xx, 1, raw= TRUE), d)
-	fit[[2]] <- lm(yy ~ poly(xx, 2, raw= TRUE), d)
-	fit[[3]] <- lm(yy ~ poly(xx, 3, raw= TRUE), d)
-	fit[[4]] <- lm(yy ~ poly(xx, 4, raw= TRUE), d)
+  fit[[1]] <- lm(yy ~ poly(xx, 1, raw= TRUE), d)
+  fit[[2]] <- lm(yy ~ poly(xx, 2, raw= TRUE), d)
+  fit[[3]] <- lm(yy ~ poly(xx, 3, raw= TRUE), d)
+  fit[[4]] <- lm(yy ~ poly(xx, 4, raw= TRUE), d)
 
-	# find parsimonious, best fitting regression model
-	Bic <- vector("numeric", 4)
+  # find parsimonious, best fitting regression model
+  Bic <- vector("numeric", 4)
 
   for (i in 1:4)
-		Bic[i] <- BIC(fit[[i]])
+    Bic[i] <- BIC(fit[[i]])
 
 
 
-	bestModel <- which.min(Bic)
+  bestModel <- which.min(Bic)
 
   xlow    <- min((min(xVar) - 0.1* min(xVar)), min(pretty(xVar)))
   xhigh   <- max((max(xVar) + 0.1* max(xVar)), max(pretty(xVar)))
@@ -905,14 +903,14 @@ Descriptives <- function(jaspResults, dataset, options, state=NULL)
   yhigh   <- max((max(yVar) + 0.1* max(yVar)), max(pretty(yVar)), max(.poly.pred(fit[[bestModel]], line= FALSE, xMin= xticks[1], xMax= xticks[length(xticks)], lwd=lwd)))
   yticks  <- pretty(c(ylow, yhigh))
 
-	plot(xVar, yVar, col="black", pch=21, bg = "grey", ylab="", xlab="", axes=F, ylim= range(yticks), xlim= range(xticks), cex= cexPoints)
+  plot(xVar, yVar, col="black", pch=21, bg = "grey", ylab="", xlab="", axes=F, ylim= range(yticks), xlim= range(xticks), cex= cexPoints)
 
-	.poly.pred(fit[[bestModel]], line= TRUE, xMin= xticks[1], xMax= xticks[length(xticks)], lwd=lwd)
+  .poly.pred(fit[[bestModel]], line= TRUE, xMin= xticks[1], xMax= xticks[length(xticks)], lwd=lwd)
 
-	par(las=1)
+  par(las=1)
 
-	axis(1, line= 0.4, labels= xticks, at= xticks, cex.axis= cexXAxis)
-	axis(2, line= 0.2, labels= yticks, at= yticks, cex.axis= cexYAxis)
+  axis(1, line= 0.4, labels= xticks, at= xticks, cex.axis= cexXAxis)
+  axis(2, line= 0.2, labels= yticks, at= yticks, cex.axis= cexYAxis)
 }
 
 .descriptivesKurtosis <- function(x) {

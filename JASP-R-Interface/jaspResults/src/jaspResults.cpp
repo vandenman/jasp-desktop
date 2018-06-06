@@ -1,4 +1,5 @@
 #include "jaspModuleRegistration.h"
+
 #include <chrono>
 #include <fstream>
 #include <cmath>
@@ -319,6 +320,7 @@ jaspObject * jaspObject::convertFromJSON(Json::Value in)
 	//case jaspObjectType::list:		newObject = new jaspList();		break;
 	case jaspObjectType::html:		newObject = new jaspHtml();			break;
 	case jaspObjectType::results:	newObject = new jaspResults();		break;
+	default:						throw std::runtime_error("Cant understand this type");
 	}
 
 	if(newObject != NULL) newObject->convertFromJSON_SetFields(in);

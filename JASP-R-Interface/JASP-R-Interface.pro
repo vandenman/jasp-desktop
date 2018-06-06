@@ -76,36 +76,3 @@ windows{
   export(copyfile.commands)
   QMAKE_EXTRA_TARGETS += first copyfile
 }
-
-DISTFILES += \
-    jaspResults/R/zzzLoadExtraFunctions.R
-
-AUX_R_FUNCTIONS_FILE = $${PWD}/jaspResults/R/zzzLoadExtraFunctions.R
-
-win32 {
-    AUX_R_FUNCTIONS_DEST = $${OUT_PWD}/..
-
-    AUX_R_FUNCTIONS_FILE ~= s,/,\\,g
-    AUX_R_FUNCTIONS_DEST ~= s,/,\\,g
-
-    copyres.commands  += $$quote(cmd /c xcopy /S /I /Y $${AUX_R_FUNCTIONS_FILE} $${AUX_R_FUNCTIONS_DEST})
-}
-
-macx {
-    AUX_R_FUNCTIONS_DEST = $${OUT_PWD}/..
-
-    copyres.commands += $(MKDIR) $$AUX_R_FUNCTIONS_DEST ;
-    copyres.commands += cp -R $$AUX_R_FUNCTIONS_FILE $$AUX_R_FUNCTIONS_DEST ;
-}
-
-linux {
-    AUX_R_FUNCTIONS_DEST = $${OUT_PWD}/..
-
-    copyres.commands += $(MKDIR) $$AUX_R_FUNCTIONS_DEST ;
-    copyres.commands += cp -R $$AUX_R_FUNCTIONS_FILE $$AUX_R_FUNCTIONS_DEST ;
-}
-
-! equals(PWD, $${OUT_PWD}) {
-    QMAKE_EXTRA_TARGETS += copyres
-    POST_TARGETDEPS     += copyres
-}

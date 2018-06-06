@@ -32,5 +32,5 @@ public:
 
 };
 
-RCPP_EXPOSED_CLASS(jaspHtml_Interface)
+RCPP_EXPOSED_CLASS_NODECL(jaspHtml_Interface)
 

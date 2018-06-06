@@ -50,4 +50,4 @@ public:
 	JASPOBJECT_INTERFACE_PROPERTY_FUNCTIONS_GENERATOR(jaspPlot, int,			_height,			Height)
 };
 
-RCPP_EXPOSED_CLASS(jaspPlot_Interface)
+RCPP_EXPOSED_CLASS_NODECL(jaspPlot_Interface)

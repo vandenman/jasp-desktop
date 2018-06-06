@@ -61,17 +61,17 @@ public:
 	///Accepts data.frame, list, matrix or vector. If the input is one-dimensional it is assumed to be the first row, if any names are set they are copied to colNames/rowNames as far as they aren't set yet.
 	void setData(Rcpp::RObject newData);
 
-	///Accepts data.frame, list, matrix or vector. If the input is one-dimensional it is assumed to be a single column, if two-dimensional then it will be assumed to be cols {rows}, if three-dimensional or higher things probably break.
+	///Accepts data.frame, list, matrix or vector. If the input is one-dimensional it is assumed to be a single column, if two-dimensional then it will be assumed to be cols {cells/rows}, if three-dimensional or higher things probably break.
 	void addColumns(Rcpp::RObject newColumns);
 
-	///Accepts data.frame, list, matrix or vector. If the input is one-dimensional it is assumed to be a single row, if two-dimensional then it will be assumed to be cols {rows}, if three-dimensional or higher things probably break. Also fills up each column up to the maximum length one with nulls.
+	///Accepts data.frame, list, matrix or vector. If the input is one-dimensional it is assumed to be a single row, if two-dimensional then it will be assumed to be rows {cells/cols}, if three-dimensional or higher things probably break. Also fills up each column up to the maximum length one with nulls.
 	void addRows(Rcpp::RObject newRows, Rcpp::CharacterVector _rowNames);
 
 	void addRowsWithoutNames(Rcpp::RObject newRows) { addRows(newRows, Rcpp::CharacterVector()); }
 
-	void setColumn(Rcpp::RObject field, Rcpp::RObject column);
+	void setColumn(std::string columnName, Rcpp::RObject column);
 
-	std::string dataToString(std::string prefix);
+	std::string dataToString(std::string prefix) override;
 
 	//void combineColumns(Rcpp::map_named_args named_args)	{ named_args["colNames"] = Rcpp::RObject(); named_args["colOvertitles"] = Rcpp::RObject(); combineCells(named_args); }
 	//void combineRows(Rcpp::map_named_args named_args)		{ named_args["rowNames"] = Rcpp::RObject(); named_args["rowOvertitles"] = Rcpp::RObject(); combineCells(named_args); }
@@ -130,9 +130,16 @@ private:
 			addOrSetColumnInData(jsonMat[col], localColNames.size() > col ? localColNames[col] : "");
 	}
 
-	template<int RTYPE>	void addColumnFromVector(Rcpp::Vector<RTYPE> newData) { _data.push_back(jaspJson::RcppVector_to_VectorJson<RTYPE>(newData));	}
+	template<int RTYPE>	void addColumnFromVector(Rcpp::Vector<RTYPE> newData)
+	{
+		setRowNamesWhereApplicable(extractElementOrColumnNames(newData));
+
+		_data.push_back(jaspJson::RcppVector_to_VectorJson<RTYPE>(newData));
+	}
 	template<int RTYPE>	void setColumnFromVector(Rcpp::Vector<RTYPE> newData, int col)
 	{
+		setRowNamesWhereApplicable(extractElementOrColumnNames(newData));
+
 		if(_data.size() <= col)
 			_data.resize(col+1);
 		_data[col] = jaspJson::RcppVector_to_VectorJson<RTYPE>(newData);
@@ -186,8 +193,11 @@ private:
 		if(elementLenghts <= 1 && newData.size() > 1) //each entry is 1 or 0, this must be a single row with columnnames and not a set of rows with rownames..
 		{
 			Rcpp::List newRowList;
+			auto shield = new Rcpp::Shield<Rcpp::List>(newRowList);
 			newRowList.push_back(newData);
 			addRowsFromList(newRowList, newRowNames);
+			delete shield;
+
 			return;
 		}
 
@@ -212,10 +222,10 @@ private:
 			if(Rcpp::is<Rcpp::List>(rij))
 				 localColNames = extractElementOrColumnNames<Rcpp::List>(Rcpp::as<Rcpp::List>(rij));
 
-			auto jsonKol = jaspJson::RcppVector_to_VectorJson(rij);
+			auto jsonRij = jaspJson::RcppVector_to_VectorJson(rij);
 
-			for(int col=0; col<jsonKol.size(); col++)
-				previouslyAddedUnnamedCols = pushbackToColumnInData(std::vector<Json::Value>({jsonKol[col]}), localColNames.size() > col ? localColNames[col] : "", equalizedColumnsLength, previouslyAddedUnnamedCols);
+			for(int col=0; col<jsonRij.size(); col++)
+				previouslyAddedUnnamedCols = pushbackToColumnInData(std::vector<Json::Value>({jsonRij[col]}), localColNames.size() > col ? localColNames[col] : "", equalizedColumnsLength, previouslyAddedUnnamedCols);
 
 		}
 
@@ -270,6 +280,15 @@ private:
 		}
 
 		return rowNamesVec;
+	}
+
+	void setRowNamesWhereApplicable(std::vector<std::string> rowNamesList)
+	{
+		for(size_t row=0; row<rowNamesList.size(); row++)
+		{
+			if(rowNamesList[row] != "" && (_rowNames.rowCount() <= row || _rowNames[row] == "")) //Add new rowNames or overwrite unset ones but if the user took the trouble to manually set it then just leave it I guess?
+				_rowNames[row] = rowNamesList[row];
+		}
 	}
 
 	template <typename RCPP_CLASS> void extractRowAndColumnNames(RCPP_CLASS rObj, int columnOffset = 0, int rowOffset = 0)
@@ -346,7 +365,7 @@ public:
 
 	void addRows(Rcpp::RObject newRows, Rcpp::CharacterVector rowNames)	{ ((jaspTable*)myJaspObject)->addRows(newRows, rowNames); }
 	void addRowsWithoutNames(Rcpp::RObject newRows)						{ ((jaspTable*)myJaspObject)->addRowsWithoutNames(newRows); }
-	void setColumn(Rcpp::RObject field, Rcpp::RObject column)			{ ((jaspTable*)myJaspObject)->setColumn(field, column); }
+	void setColumn(std::string columnName, Rcpp::RObject column)		{ ((jaspTable*)myJaspObject)->setColumn(columnName, column); }
 
 
 	JASPOBJECT_INTERFACE_PROPERTY_FUNCTIONS_GENERATOR(jaspTable, bool,			_transposeTable,			TransposeTable)
@@ -356,4 +375,4 @@ public:
 	JASPOBJECT_INTERFACE_PROPERTY_FUNCTIONS_GENERATOR(jaspTable, std::string,	_errorMessage,			ErrorMessage)
 };
 
-RCPP_EXPOSED_CLASS(jaspTable_Interface)
+RCPP_EXPOSED_CLASS_NODECL(jaspTable_Interface)

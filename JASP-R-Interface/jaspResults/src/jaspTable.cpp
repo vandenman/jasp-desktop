@@ -8,7 +8,7 @@ std::string jaspColRowCombination::toString()
 
 	std::stringstream out;
 	out << "{ " << (ColumnsNotRows ? "col-" : "row-") << "combination with title(" << title << "), name("<<name<<") and " << (ColumnsNotRows ? "cols" : "rows") << ": [";
-	int num = 0;
+	
 	out << "[" << (ColumnsNotRows ? colNames.toStyledString() : rowNames.toStyledString());
 	out << "], does " << (overwrite? "" : "not ") << "overwrite and does " << (removeSeparator? "" : "not ") << "remove separator.";
 	return out.str();
@@ -105,6 +105,7 @@ int jaspTable::getDesiredColumnIndexFromNameForColumnAdding(std::string colName)
 int jaspTable::pushbackToColumnInData(std::vector<Json::Value> column, std::string colName, int equalizedColumnsLength, int previouslyAddedUnnamed)
 {
 	int desiredColumnIndex = getDesiredColumnIndexFromNameForRowAdding(colName, previouslyAddedUnnamed);
+
 	if(desiredColumnIndex >= _colNames.rowCount() || _colNames[desiredColumnIndex] == "")
 		previouslyAddedUnnamed++;
 
@@ -128,37 +129,33 @@ int jaspTable::getDesiredColumnIndexFromNameForRowAdding(std::string colName, in
 {
 	int desiredIndex = -1;
 
-	for(int possibleColIndex=0; possibleColIndex<_colNames.rowCount(); possibleColIndex++)
-		if(_colNames[possibleColIndex] == colName)
-			desiredIndex = possibleColIndex;
+	if(colName != "")
+	{
+		for(int possibleColIndex=0; possibleColIndex<_colNames.rowCount(); possibleColIndex++)
+			if(_colNames[possibleColIndex] == colName)
+				desiredIndex = possibleColIndex;
 
-	if(desiredIndex != -1)
-		return desiredIndex;
-
-	//lets pretend we didnt get a name
+		if(desiredIndex != -1)
+			return desiredIndex;
+	}
 
 	int foundUnnamed = 0;
-	for(int col=0; col<_colNames.rowCount(); col++)
+	for(int col=0; col<_colNames.rowCount() || col < _data.size(); col++)
 		if(_colNames[col] == "")
 		{
+
 			if(previouslyAddedUnnamed == foundUnnamed)
 				return col;
+
 			foundUnnamed++;
 		}
 
 	return _colNames.rowCount();
 }
 
-void jaspTable::setColumn(Rcpp::RObject field, Rcpp::RObject column)
+void jaspTable::setColumn(std::string columnName, Rcpp::RObject column)
 {
-	int colIndex = -1;
-
-	if(Rcpp::is<Rcpp::NumericVector>(field) || Rcpp::is<Rcpp::IntegerVector>(field))
-		colIndex = Rcpp::as<int>(field) - 1;
-	else if(Rcpp::is<Rcpp::CharacterVector>(field) || Rcpp::is<Rcpp::StringVector>(field))
-		colIndex = getDesiredColumnIndexFromNameForColumnAdding(Rcpp::as<std::string>(field));
-	else
-		Rf_error("Did not get a number, integer or string to index on.");
+	int colIndex = getDesiredColumnIndexFromNameForColumnAdding(columnName);
 
 	if(Rcpp::is<Rcpp::NumericVector>(column))			setColumnFromVector<REALSXP>((Rcpp::NumericVector)	column, colIndex);
 	else if(Rcpp::is<Rcpp::LogicalVector>(column))		setColumnFromVector<LGLSXP>((Rcpp::LogicalVector)	column, colIndex);
@@ -227,6 +224,21 @@ void jaspTable::addRows(Rcpp::RObject newData, Rcpp::CharacterVector rowNames)
 
 void jaspTable::addColumnsFromList(Rcpp::List newData)
 {
+	size_t elementLenghts = 0;
+	for(int el=0; el<newData.size(); el++)
+		elementLenghts = std::max(lengthFromRObject((Rcpp::RObject)newData[el]), elementLenghts);
+
+	if(elementLenghts <= 1 && newData.size() > 1) //each entry is 1 or 0, this must be a single row with columnnames and not a set of rows with rownames..
+	{
+		Rcpp::List newColList;
+		auto shield = new Rcpp::Shield<Rcpp::List>(newColList);
+		newColList.push_back(newData);
+		addColumnsFromList(newColList);
+		delete shield;
+
+		return;
+	}
+
 	std::vector<std::string> localColNames = extractElementOrColumnNames(newData);
 	extractRowNames(newData, true);
 
@@ -237,6 +249,9 @@ void jaspTable::addColumnsFromList(Rcpp::List newData)
 ///Logically we must assume that each entry in the list is a single element vector
 void jaspTable::setColumnFromList(Rcpp::List column, int colIndex)
 {
+	std::vector<std::string> localRowNames = extractElementOrColumnNames(column);
+	setRowNamesWhereApplicable(localRowNames);
+
 	if(_data.size() <= colIndex)
 		_data.resize(colIndex+1);
 	_data[colIndex].clear();

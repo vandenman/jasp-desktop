@@ -102,4 +102,4 @@ public:
 };
 
 
-RCPP_EXPOSED_CLASS(jaspResults_Interface)
+RCPP_EXPOSED_CLASS_NODECL(jaspResults_Interface)

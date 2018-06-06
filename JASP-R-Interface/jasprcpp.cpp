@@ -91,7 +91,8 @@ void STDCALL jaspRCPP_init(const char* buildYear, const char* version, RBridgeCa
 	jaspTable::setCitation(baseCitation);
 	rInside["jaspResultsModule"]			= givejaspResultsModule();
 
-	rInside.parseEvalQ("source('zzzLoadExtraFunctions.R')"); //File should be next to JAPEngine
+	rInside.parseEvalQ("jaspResultsModule$jaspTable$methods(addColumnInfo = function(name=NULL, title=NULL, type=NULL, format=NULL, combine=NULL) { addColumnInfoHelper(name, title, type, format, combine) })");
+	rInside.parseEvalQ("jaspResultsModule$jaspTable$methods(addFootnote =   function(message=\"\", symbol=NULL, col_names=NULL, row_names=NULL) { addFootnoteHelper(message, symbol, col_names, row_names) })");
 
 	rInside["jasp.analyses"] = Rcpp::List();
 	rInside.parseEvalQNT("suppressPackageStartupMessages(library(\"JASP\"))");

@@ -60,19 +60,6 @@ Json::Value jaspJson::RObject_to_JsonValue(Rcpp::List obj)
 	return val;
 }
 
-
-template<> Json::Value jaspJson::RVectorEntry_to_JsonValue<INTSXP>(Rcpp::Vector<INTSXP> obj, int row)					{ return Json::Value((int)(obj[row]));			}
-template<> Json::Value jaspJson::RMatrixColumnEntry_to_JsonValue<INTSXP>(Rcpp::MatrixColumn<INTSXP> obj, int row)		{ return Json::Value((int)(obj[row]));			}
-
-template<> Json::Value jaspJson::RVectorEntry_to_JsonValue<REALSXP>(Rcpp::Vector<REALSXP> obj, int row)					{ return Json::Value((double)(obj[row]));		}
-template<> Json::Value jaspJson::RMatrixColumnEntry_to_JsonValue<REALSXP>(Rcpp::MatrixColumn<REALSXP> obj, int row)		{ return Json::Value((double)(obj[row]));		}
-
-template<> Json::Value jaspJson::RVectorEntry_to_JsonValue<LGLSXP>(Rcpp::Vector<LGLSXP> obj, int row)					{ return Json::Value((bool)(obj[row]));			}
-template<> Json::Value jaspJson::RMatrixColumnEntry_to_JsonValue<LGLSXP>(Rcpp::MatrixColumn<LGLSXP> obj, int row)		{ return Json::Value((bool)(obj[row]));			}
-
-template<> Json::Value jaspJson::RVectorEntry_to_JsonValue<STRSXP>(Rcpp::Vector<STRSXP> obj, int row)					{ return Json::Value((std::string)(obj[row]));	}
-template<> Json::Value jaspJson::RMatrixColumnEntry_to_JsonValue<STRSXP>(Rcpp::MatrixColumn<STRSXP> obj, int row)		{ return Json::Value((std::string)(obj[row]));	}
-
 std::string jaspJson::jsonToPrefixedStrings(Json::Value val, std::string prefix)
 {
 	if(prefix == "")

@@ -177,10 +177,14 @@ Rcpp::DataFrame jaspObject::convertFactorsToCharacters(Rcpp::DataFrame df)
 		if(Rf_isFactor(df[col]))
 		{
 			Rcpp::IntegerVector		originalColumn	= df[col];
-			std::cout << "originalColumn: " << originalColumn << "\n" << std::flush;
 
 			Rcpp::CharacterVector	factorLevels	= originalColumn.attr("levels");
-			std::cout << "factorLevels: " << factorLevels << "\n" << std::flush;
+
+#ifdef JASP_DEBUG
+			std::cout	<< "converting factors to characters for dataframe\n"
+						<< "originalColumn: " << originalColumn << "\n"
+						<< "factorLevels: " << factorLevels << std::endl;
+#endif
 
 			Rcpp::CharacterVector	charCol(originalColumn.size());
 
