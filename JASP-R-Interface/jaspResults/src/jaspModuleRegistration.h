@@ -150,6 +150,12 @@ RCPP_MODULE(jaspResults)
 		.property("object", &jaspState_Interface::getObject, &jaspState_Interface::setObject, "The object that you might want to keep for the next revision of your analysis.")
 	;
 
+
+	Rcpp::class_<jaspState_Interface>("jaspState")
+		.derives<jaspObject_Interface>("jaspObject")
+		.property("object", &jaspState_Interface::getObject, &jaspState_Interface::setObject, "The object that you might want to keep for the next revision of your analysis.")
+	;
+
 	Rcpp::class_<jaspResults_Interface>("jaspResultsClass")
 		.derives<jaspContainer_Interface>("jaspContainer")
 		.method("send",						&jaspResults_Interface::send,									"Constructs the results/response-json and sends it to JASP-Desktop, but only if jaspResults::setSendFunc was called with an appropriate sendFuncDef first.")
