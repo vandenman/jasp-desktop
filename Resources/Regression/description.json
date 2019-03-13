@@ -36,6 +36,10 @@
 		{
 			"title":	"Bayesian Linear Regression",
 			"function":	"RegressionLinearBayesian"
+		},
+		{
+			"title":	"Bayesian Logistic Regression",
+			"function":	"RegressionLogisticBayesian"
 		}
 	]
 }

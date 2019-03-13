@@ -179,6 +179,7 @@ DISTFILES += \
     JASP/R/regressionlinear.R \
     JASP/R/regressionlinearbayesian.R \
     JASP/R/regressionlogistic.R \
+	JASP/R/regressionlogisticbayesian.R \
     JASP/R/regressionloglinear.R \
     JASP/R/regressionloglinearbayesian.R \
     JASP/R/reinforcementlearningr11tlearning.R \
