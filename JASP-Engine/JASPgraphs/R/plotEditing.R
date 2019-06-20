@@ -1,19 +1,20 @@
+# TODO:
+#
+# - drop limits from modifyable options?
+# - introduce expand as option?
+# - breaks[1] >= limits[1] ? expand[1] = breaks[1] - limits[1]] : expands[1] <- 0
+#
+# better handling of non-standard ggplot scales
+# for example, breaks may be NULL, waiver(), a numeric vector, or a function
+#
+#
+
 fromJSON  <- function(x) jsonlite::fromJSON(x, TRUE, FALSE, FALSE)
 toJSON    <- function(x) jsonlite::toJSON(x, auto_unbox = TRUE, digits = NA, null = "null")
 
 #' @importFrom ggplot2 layer_scales is.ggplot ggplot_build
 
-# possible optimization!
-# layer_scales <- function(plot, i = 1L, j = 1L) {
-#   if (is.ggplot(plot)) {
-#     print("Inefficient!")
-#     return(ggplot2::layer_scales(plot, i, j))
-#   }
-#   # definition from ggplot2::layer_scales but without ggplot_build
-#   layout <- plot$layout$layout
-#   selected <- layout[layout$ROW == i & layout$COL == j, , drop = FALSE]
-#   return(list(x = plot$layout$panel_scales_x[[selected$SCALE_X]], y = b$layout$panel_scales_y[[selected$SCALE_Y]]))
-# }
+`%|NW|%` <- function(a, b) if (!(is.null(a) || is.waive(a))) a else b
 
 # all axis types in ggplot
 AxisTypes <- c(
@@ -38,7 +39,6 @@ getAxisType.list <- function(x) {
   return(c("x" = scaleX, "y" = scaleY))
 }
 
-
 getAxisType.ggplot_built <- function(x) {
   return(c(
     "x" = class(x[["layout"]][["panel_scales_x"]][[1L]])[[2L]],
@@ -50,68 +50,84 @@ getAxisType.ggplot <- function(x) {
   return(getAxisType.list(layer_scales(x, i = 1L, j = 1L)))
 }
 
+getAxisTitle <- function(x, xory) {
+  if (xory == "x") {
+    return(x[["layout"]][["panel_scales_x"]][[1L]][["name"]] %|NW|% x[["plot"]][["labels"]][["x"]])
+  } else {
+    return(x[["layout"]][["panel_scales_y"]][[1L]][["name"]] %|NW|% x[["plot"]][["labels"]][["y"]])
+  }
+}
+
+
 evenly_spaced <- function(x) {
   by <- x[2L] - x[1L]
   return(all((x[-length(x)] - x[-1L] - by) <= .Machine[["double.eps"]]))
 }
 
-getAxisInfo <- function(x) {
+getAxisInfo <- function(x, opts, ggbuild) {
   UseMethod("getAxisInfo", x)
 }
 
-getAxisInfo.ScaleContinuousPosition <- function(x) {
+getAxisInfo.ScaleContinuousPosition <- function(x, opts, ggbuild) {
 
-  info <- x[["break_info"]]()
-  return(list(
-    limits   = info[["range"]],
-    labels   = info[["labels"]],
-    breaks   = info[["major_source"]]
-  ))
+  xory <- x[["aesthetics"]][1L]
+  nms2keep <- c("labels", "major_source")
+  nms2give <- c("labels", "breaks")
+  opts2keep <- opts[paste(xory, nms2keep, sep = ".")]
+  names(opts2keep) <- nms2give
+  if (is.waive(x[["expand"]])) {
+    opts2keep[["expand"]] <- ggplot2:::expand_default(x)
+  } else {
+    opts2keep[["expand"]] <- x[["expand"]]
+  }
+
+  opts2keep[["title"]] <- getAxisTitle(ggbuild, xory)
+
+  return(opts2keep)
+
 }
 
-getAxisInfo.ScaleDiscretePosition <- function(x) {
+getAxisInfo.ScaleDiscretePosition <- function(x, opts, ggbuild) {
 
+  xory <- x[["aesthetics"]][1L]
   return(list(
     labels = x[["get_labels"]](),
-    shown  = x[["get_limits"]]()
+    shown  = x[["get_limits"]](),
+    title  = getAxisTitle(ggbuild, xory)
   ))
 
 }
 
 internalUpdateAxis <- function(currentAxis, newSettings) {
+  if (!is.null(newSettings[["title"]]))
+    currentAxis[["name"]] <- newSettings[["title"]]
   UseMethod("internalUpdateAxis", currentAxis)
 }
 
 internalUpdateAxis.ScaleContinuousPosition <- function(currentAxis, newSettings) {
 
-  # newSettings only contains not modified settings!
-  if (!is.null(newSettings[["limits"]]))
-    currentAxis[["limits"]] <- newSettings[["limits"]]
-
+  # newSettings only contains modified settings!
   if (!is.null(newSettings[["labels"]]))
     currentAxis[["labels"]] <- c(newSettings[["labels"]])
 
-  # if (!is.null(newSettings[["fromByTo"]]) || !is.null(newSettings[["breaks"]])) {
   if (!is.null(newSettings[["breaks"]])) {
-    # if (!is.null(newSettings[["breaks"]])) {
-      breaks <- sort(newSettings[["breaks"]])
-    # } else {
-      # fromToBy <- newSettings[["fromToBy"]]
-      # breaks <- seq(fromToBy[1L], fromToBy[2L], fromToBy[3L])
-    # }
-    currentAxis[["breaks"]] <- breaks
-  } else if (!is.null(newSettings[["labels"]]) && is.waive(currentAxis[["breaks"]])) {
-    breaks <- currentAxis[["get_breaks"]]()
-    currentAxis[["breaks"]] <- breaks[!is.na(breaks)]
+    currentAxis[["breaks"]] <- sort(newSettings[["breaks"]])
+    currentAxis[["limits"]] <- range(currentAxis[["limits"]], newSettings[["breaks"]])
+    # TODO: see if some plot element fall outside of the new limits!
   }
+
+  if (!is.null(newSettings[["expand"]])) {
+    currentAxis[["expand"]] <- newSettings[["expand"]]
+  }
+
   return(currentAxis)
 }
 
 internalUpdateAxis.ScaleDiscretePosition <- function(currentAxis, newSettings) {
 
   # newSettings only contains not modified settings!
-  if (!is.null(newSettings[["limits"]]))
-    currentAxis[["limits"]] <- newSettings[["limits"]]
+  if (!is.null(newSettings[["shown"]]))
+    currentAxis[["limits"]] <- newSettings[["shown"]]
 
   if (!is.null(newSettings[["labels"]]))
     currentAxis[["labels"]] <- newSettings[["labels"]]
@@ -140,10 +156,12 @@ plotEditingOptions <- function(graph, asJSON = FALSE) {
   UseMethod("plotEditingOptions", graph)
 }
 
+#' @export
 plotEditingOptions.gg <- function(graph, asJSON = FALSE) {
   return(plotEditingOptions.ggplot(graph, asJSON))
 }
 
+#' @export
 plotEditingOptions.ggplot <- function(graph, asJSON = FALSE) {
 
   ggbuild <- ggplot_build(graph)
@@ -151,28 +169,25 @@ plotEditingOptions.ggplot <- function(graph, asJSON = FALSE) {
 
 }
 
-plotEditingOptions.ggplot_built <- function(ggbuild, asJSON) {
+#' @export
+plotEditingOptions.ggplot_built <- function(ggbuild, asJSON = FALSE) {
 
-  opts <- ggbuild$layout$coord$labels(ggbuild$layout$panel_params)[[1L]]
-  idx1 <- startsWith(names(opts), "x")
-  nms <- substring(names(opts[idx1]), 3L)
-  nms2keep <- c("range",  "labels", "major_source")
-  nms2give <- c("limits", "labels", "breaks")
-  idx2 <- nms %in% nms2keep
-
+  # only relevant for continuous scales?
+  opts <- ggbuild[["layout"]][["coord"]][["labels"]](ggbuild[["layout"]][["panel_params"]])[[1L]]
   axisTypes <- getAxisType(ggbuild)
+  currentAxis <- ggbuild[["layout"]][["get_scales"]](1L)
 
-  out <- list(
-    xAxis = list(
+  xSettings <- getAxisInfo(currentAxis[["x"]], opts, ggbuild)
+  ySettings <- getAxisInfo(currentAxis[["y"]], opts, ggbuild)
+
+  out <- list(xAxis = list(
       type     = axisTypes[["x"]],
-      settings = opts[idx1 & idx2]
-    ),
-    yAxis = list(
+      settings = xSettings
+    ), yAxis = list(
       type     = axisTypes[["y"]],
-      settings = opts[!idx1 & idx2]
+      settings = ySettings
     )
   )
-  names(out[["xAxis"]][["settings"]]) <- names(out[["yAxis"]][["settings"]]) <- nms2give
 
   if (asJSON)
     out <- toJSON(out)
@@ -206,7 +221,7 @@ plotEditing <- function(graph, newOptions) {
   newOptions  <- validateOptions(newOptions, oldOptions)
   diffOptions <- optionsDiff(newOptions, oldOptions)
 
-  currentAxis <- layer_scales(graph) # <- could be ggbuild
+  currentAxis <- ggbuild[["layout"]][["get_scales"]](1L)
 
   if (length(diffOptions[["xAxis"]][["settings"]]) > 0L)
     graph <- graph + internalUpdateAxis(currentAxis[["x"]], diffOptions[["xAxis"]][["settings"]])
