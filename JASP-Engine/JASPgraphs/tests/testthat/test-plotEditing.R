@@ -49,4 +49,11 @@ test_that("manipulating discrete axes works", {
   g2c <- plotEditing(g2a, opts2c)
   expect_equal(plotEditingOptions(g2c), opts2c)
 
+  opts2d <- opts2c
+  opts2d$xAxis$settings$breaks <- seq(15, 25, 5)
+  opts2d$xAxis$settings$labels <- as.character(seq(15, 25, 5))
+
+  g2d <- plotEditing(g2a, opts2d)
+  expect_equal(plotEditingOptions(g2d), opts2d)
+
 })
