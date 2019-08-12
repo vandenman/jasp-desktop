@@ -22,7 +22,7 @@ RegressionLogisticBayesian <- function(jaspResults, dataset, options) {
   
   model <- .regLogBayTableModelComparison(jaspResults, dataset, options)
   .regLogBayPosteriorSummary(jaspResults, options, model)
-  
+  .regLogBayDescriptives(jaspResults, options, dataset)
   return()
   
   # # STATE SYSTEM
@@ -233,12 +233,17 @@ RegressionLogisticBayesian <- function(jaspResults, dataset, options) {
     wlsWeights <- rep.int(1L, nrow(dataset))
   }
   
-  # TODO: BAS produces output for the predictors explain this
+  # for factors BAS produces output for the predictors in the form ".v(name1)level:.v(name2)level"
+  # by changing all levels to " (level)" we can easily distinghuish between interaction, separated by a : which is not
+  # in base64, and levels, separated by ( which is also not in base64. ordered = FALSE enforces that factors are not 
+  # ordered which would change the way predictors are named completely (without influencing the results).
   for (var in .v(options[["factors"]]))
-    levels(dataset[[var]]) <- paste0(" (", factor(dataset[[var]]), ")")
-  
-  # we make a list with bas_obj and other stuff, because Merlise indexes with $prior and adding things to the bas_obj
-  # can cause name clashes
+    dataset[[var]] <- factor(dataset[[var]], labels = paste0(" (", levels(dataset[[var]]), ")"), ordered = FALSE)
+
+  # TODO: set contrasts?
+
+  # we make a list with bas_obj and other stuff rather than putting everything in bas_obj, because Merlise indexes with 
+  # $prior and adding things to the bas_obj can cause name clashes in other functions
   bas_obj <- try(BAS::bas.glm(
     formula     = formula, 
     family      = stats::binomial(link = "logit"),
@@ -246,10 +251,11 @@ RegressionLogisticBayesian <- function(jaspResults, dataset, options) {
     # weights     = wlsWeights,
     renormalize = TRUE
   ))
+
   model <- list(bas_obj = bas_obj)
   if (!isTryError(model[["bas_obj"]])) {
-    
-    # rename the variables from ".v(name) (level): .v(name) (level)" to "name (level) * name (level)".
+
+    # rename the variables from ".v(name) (level):.v(name) (level)" to "name (level) * name (level)".
     model[["newNamesx"]] <- .regLogBayRenameNamesx(model[["bas_obj"]][["namesx"]][-1L])
     model[["BFM"]] <- (bas_obj[["postprobs"]] / (1 - bas_obj[["postprobs"]])) / (bas_obj[["priorprobs"]] / (1 - bas_obj[["priorprobs"]]))
     
@@ -292,15 +298,27 @@ RegressionLogisticBayesian <- function(jaspResults, dataset, options) {
 }
 
 .regLogBayFillTableModelComparison <- function(jaspTable, model, options) {
-  
-  allTerms <- model[["newNamesx"]]
+
   bas_obj <- model[["bas_obj"]]
+  allTerms <- model[["newNamesx"]]
+  # remove the levels from the names
+  xlevels <- bas_obj[["xlevels"]]
+  levNames <- .unv(names(xlevels))
+  
+  interactionSymbol <- "\u2009\u273B\u2009"
+  allTerms <- strsplit(allTerms, interactionSymbol)
+  # regex to match the last (...), i.e., the level name
+  allTerms <- sapply(allTerms, function(x) paste(stringr::str_remove_all(x," \\(([^)]*)\\)[^(]*$"), collapse = interactionSymbol))
+  allTerms[duplicated(allTerms)] <- ""
+
+  # altnerative solution is to create a which2 that only contains non-duplicated names!
   which <- bas_obj[["which"]]
   modelNames <- character(length(which))
   modelNames[1L] <- "Null model" # TODO: including
   for (i in 2:length(modelNames)) {
-    idx <- which[[i]][-1L]
-    modelNames[i] <- paste(allTerms[idx], collapse = " + ")
+    idx <- which[[i]][-1L] + 1L
+    terms <- allTerms[idx]
+    modelNames[i] <- paste(terms[terms != ""], collapse = " + ")
   }
   
   logmarg <- bas_obj[["logmarg"]]
@@ -320,8 +338,15 @@ RegressionLogisticBayesian <- function(jaspResults, dataset, options) {
     BFM            = model[["BFM"]],
     Deviance       = bas_obj[["deviance"]]
   )
-  table <- table[order(table[, "BF"], decreasing = TRUE), ]
-  
+
+  ord <- order(table[, "BF"], decreasing = options[["bayesFactorType"]] != "BF01")
+  if (options[["shownModels"]] == "limited") {
+    ord <- ord[seq_len(min(nrow(table), options[["numShownModels"]]))]
+    if (options[["bayesFactorOrder"]] == "nullModelTop")
+      ord <- c(1L, ord[ord != 1L])
+  }
+  table <- table[ord, ]
+    
   jaspTable$setData(table)
   return()
 }
@@ -486,6 +511,10 @@ RegressionLogisticBayesian <- function(jaspResults, dataset, options) {
   summaryTable[["upperCri"]]    <- summaryObj[["conf95"]][, 2L]
   summaryTable[["BFincl"]]      <- .recodeBFtype(BFincl, oldBFtype = "BF10", newBFtype = options[["bayesFactorType"]])
 
+  # TODO: add footnote if cris are 0.
+  # TODO: discuss with EJ if the table should be
+  # Coefficient - P(incl) - P(incl|data) - BFincl - level - 
+  
   if (any(is.infinite(BFincl)))
     summaryTable$addFootnote(paste(
       "Infinite inclusion Bayes factors are a sign that the MCMC algorithm may need to run longer.",
@@ -529,7 +558,7 @@ RegressionLogisticBayesian <- function(jaspResults, dataset, options) {
   title <- sprintf("Posterior Coefficients with %s%% Credible Interval", 
                    format(100*options[["posteriorSummaryPlotCredibleIntervalValue"]], digits = 3))
 
-  plot <- createJaspPlot(title = title, position = 2)
+  plot <- createJaspPlot(title = title, position = 2, dependencies = c("postSummaryPlot", "omitIntercept"))
   summaryContainer[["posteriorPlots"]] <- plot
 
   if (!results[["ready"]] || summaryContainer$getError())  
@@ -558,6 +587,90 @@ RegressionLogisticBayesian <- function(jaspResults, dataset, options) {
   plot$plotObject <- graph
   return()
 
+}
+
+# descriptives ----
+.regLogBayDescriptives <- function(jaspResults, options, dataset) {
+
+  if (!options[["factorDescriptivesOpt"]] || !is.null(jaspResults[["descriptivesTable"]]))
+    return()
+  
+  descriptivesTable <- createJaspTable("Factor Descriptives")
+  dependent <- options[["dependent"]]
+  fixed <- options[["factors"]]
+  descriptivesTable$dependOn(c("dependent", "factors"))
+  
+  if (length(fixed) > 0L) {
+    fixedB64 <- .v(fixed)
+    nmsB64 <- paste0(fixedB64, ".")
+    for (i in seq_along(fixed)) {
+      descriptivesTable$addColumnInfo(name = nmsB64[i], type = "string", title = fixed[i], combine = TRUE)
+    }
+  }
+
+  dependentB64 <- .v(dependent)  
+  if ((dependent != "" || is.null(dependent))) {
+    referenceLevel <- levels(dataset[[dependentB64]])[1L]
+    title <- paste("proportion", referenceLevel)
+  } else {
+    title <- "proportion"
+    referenceLevel <- NULL
+  }
+  descriptivesTable$addColumnInfo(name = "N",                          type = "integer")
+  descriptivesTable$addColumnInfo(name = "proportion", title = title,  type = "number")
+  jaspResults[["descriptivesTable"]] <- descriptivesTable
+  
+  if (!(length(fixed) > 0L && (dependent != "" || is.null(dependent))))
+    return()
+  
+  # fill table
+  tmpFun <- function(data, fixedB64, dependentB64, referenceLevel) {
+    row <- list()
+    for (j in fixedB64)
+      row[[paste0(j, ".")]] <- as.character(data[1L, j])
+    
+    N <- nrow(data)
+    row[["N"]] <- N
+
+    if (N == 0L)
+      row[["proportion"]] <- NA_real_
+    else if (N == 1L)
+      row[["proportion"]] <- data[[dependentB64]]
+    else
+      row[["proportion"]] <- mean(data[[dependentB64]] == referenceLevel)
+
+    return(row)
+  }
+  
+  # order the data to show
+  dataset2 <- dataset[do.call(order, dataset[, fixedB64, drop = FALSE]), c(dependentB64, fixedB64)]
+  
+  # by pasting the fixedFactors together we obtain the unique indices to group on. This excludes
+  # non-existent combinations. A "." is added to deal with the level "".
+  ind <- apply(dataset2[, fixedB64, drop = FALSE], 1L, paste0, ".", collapse = "")
+  
+  # apply tempFun on each subset defined by ind
+  rows <- by(dataset2, ind, tmpFun, fixedB64 = fixedB64, dependentB64 = dependentB64,
+             referenceLevel = referenceLevel)
+
+  # do.call(rbind, rows) turns rows into a data.frame (from a list) for jaspResults
+  data <- do.call(rbind.data.frame, rows)
+
+  # add footnote if there are unobserved combinations
+  nObserved <- nrow(data)
+  nPossible <- prod(sapply(dataset2[, fixedB64, drop = FALSE], nlevels))
+  if (nObserved != nPossible) {
+    descriptivesTable$addFootnote(
+      symbol = "<em>Note.</em>", 
+      message = sprintf(
+        "Some combinations of factors are not observed and hence omitted (%g out of %g combinations are unobserved).",
+        nPossible - nObserved, nPossible
+      )
+    )
+  }
+  
+  descriptivesTable$setData(data)
+  return()
 }
 
 # helper functions ----
