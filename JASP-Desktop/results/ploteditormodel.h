@@ -1,7 +1,10 @@
 #ifndef PLOTEDITORMODEL_H
 #define PLOTEDITORMODEL_H
 
+<<<<<<< HEAD
 #include <QUrl>
+=======
+>>>>>>> Added PlotEditorModel and ways for the information to flow
 #include <QObject>
 #include "jsonredirect.h"
 #include "ploteditoraxismodel.h"
@@ -42,7 +45,7 @@ signals:
 	void dataChanged(										);
 	void titleChanged(			QString		title			);
 	void widthChanged(			int			width			);
-	void heightChanged(		int			height			);
+	void heightChanged(			int			height			);
 	void dummyAxisChanged();
 
 public slots:
@@ -76,4 +79,3 @@ private:
 };
 
 #endif // PLOTEDITORMODEL_H
-
