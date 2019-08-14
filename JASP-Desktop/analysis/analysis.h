@@ -187,13 +187,8 @@ protected:
 							_results		= Json::nullValue,
 							_imgResults		= Json::nullValue,
 							_userData		= Json::nullValue,
-<<<<<<< HEAD
 							_imgOptions		= Json::nullValue,
 							_progress		= Json::nullValue;
-=======
-							_imgOptions		= Json::nullValue;
-	int						_progress		= -1;
->>>>>>> Added PlotEditorModel and ways for the information to flow
 
 private:
 	size_t					_id,
