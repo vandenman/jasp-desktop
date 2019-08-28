@@ -201,6 +201,8 @@ void BoundQMLTextArea::checkSyntax()
 			R_FunctionWhiteList::scriptIsSafe(_text.toStdString()); 
 			_item->setProperty("hasScriptError", false);
 			_item->setProperty("infoText", "valid R code");
+			if (_boundTo != nullptr)
+				_boundTo->setValue(_text.toStdString());			
 		}
 		catch(filterException & e)
 		{

@@ -140,6 +140,8 @@ themeJaspRaw = function(legend.position = "none",
     ggplot2::theme(
         # generics
         rect = getBackgroundRect(getGraphOption("debug")),
+		text = element_text(size = fontsize),
+
         # axis
         axis.line = element_blank(),
         axis.text = ggplot2::element_text(family = family, size = fontsize),
@@ -174,7 +176,11 @@ themeJaspRaw = function(legend.position = "none",
         # plot
         plot.background = ggplot2::element_rect(fill = "transparent", color = "transparent"),
         plot.margin = ggplot2::margin(),
-        plot.title = ggplot2::element_text(family = family, size = fontsize, hjust = 0.5) # center title
+        plot.title = ggplot2::element_text(family = family, size = fontsize, hjust = 0.5), # center title
+		
+		# facet_wrap / facet_grid
+		strip.background = element_rect(fill = "transparent", color = "transparent")
+
     )
 }
 
