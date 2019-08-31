@@ -207,7 +207,7 @@ void BoundQMLTextArea::checkSyntax()
 		catch(filterException & e)
 		{
 			_item->setProperty("hasScriptError", true);
-			std::string errorMessage = std::string("R code is not safe because of: ") + e.what();
+			std::string errorMessage(e.what());
 			_item->setProperty("infoText", errorMessage.c_str());
 		}		
 		
