@@ -74,6 +74,7 @@ public:
 
 
 	Column * createColumn(std::string name);
+	std::vector<std::string> getColumnNames();
 
 private:
 	void setSharedMemory(boost::interprocess::managed_shared_memory *mem);

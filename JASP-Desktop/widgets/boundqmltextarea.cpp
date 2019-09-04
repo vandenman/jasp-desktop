@@ -24,6 +24,13 @@
 #include <QQuickItem>
 #include <QQuickTextDocument>
 #include <QFontDatabase>
+
+#include <QString>
+#include <QRegularExpression>
+#include <QList>
+#include <QSet>
+#include <QDebug>
+
 #include "log.h"
 
 
@@ -108,6 +115,26 @@ BoundQMLTextArea::BoundQMLTextArea(QQuickItem* item, AnalysisForm* form)
 		font.setPointSize(10);
 		_item->setProperty("font", font);
 				
+	}
+	else if (textType == "JAGSmodel")
+	{
+		_textType = TextType::JAGSmodel;
+
+#ifdef __APPLE__
+		_applyScriptInfo = "\u2318 + Enter to apply";
+#else
+		_applyScriptInfo = "Ctrl + Enter to apply";
+#endif
+		_item->setProperty("applyScriptInfo", _applyScriptInfo);
+
+		int id = QFontDatabase::addApplicationFont(":/fonts/FiraCode-Retina.ttf");
+		QString family = QFontDatabase::applicationFontFamilies(id).at(0);
+
+		QFont font(family);
+		font.setStyleHint(QFont::Monospace);
+		font.setPointSize(10);
+		_item->setProperty("font", font);
+			
 	}
 	else
 		_textType = TextType::Default;
@@ -212,6 +239,14 @@ void BoundQMLTextArea::checkSyntax()
 		}		
 		
 	}
+	else if (_textType == TextType::JAGSmodel) 
+	{
+		if (_boundTo != nullptr)
+			_boundTo->setValue(_text.toStdString());			
+		
+		setJagsParameters();
+		
+	}
 	else
 	{
 		if (_boundTo != nullptr)
@@ -239,4 +274,35 @@ void BoundQMLTextArea::rScriptDoneHandler(const QString & result)
 	}
 }
 
+void BoundQMLTextArea::setJagsParameters()
+{
+	// get the column names of the data set
+	std::vector<std::string> colnms = form()->getDataSet()->getColumnNames();
+	std::set<std::string> columnNames(std::make_move_iterator(colnms.begin()), std::make_move_iterator(colnms.end()));
 
+	// regex to match all words after whitespace or { and ~ or = or <-.
+	QRegularExpression getParametersFromModel("(?<={|\\s)\\b(\\w*)(.*)(?=~|=|<-)");
+	QRegularExpressionMatchIterator i = getParametersFromModel.globalMatch(_text);
+	qInfo() << "_text: " << _text;
+
+	QSet<QString> parameters;
+	while (i.hasNext())
+	{
+		QRegularExpressionMatch match = i.next();
+		QString parameter = match.captured(1);
+		qInfo() << "match contains: " << parameter;
+		if (parameter != "" && columnNames.find(parameter.toUtf8().constData()) == columnNames.end())
+		{
+			parameters << parameter;
+			qInfo() << "parameter: " << parameter;
+		}
+		else
+		{
+			qInfo() << "excluded: " << parameter;
+		}
+	}
+	if (_modelParameter)
+		_modelParameter->initTerms(parameters.toList());
+	else
+		qInfo() << "No model Parameter view";
+}
