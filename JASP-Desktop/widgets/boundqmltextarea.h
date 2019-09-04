@@ -27,12 +27,17 @@
 
 #include <QObject>
 
+#include <QString>
+#include <QRegularExpression>
+#include <QList>
+#include <QDebug>
+#include <QQuickItem>
 
 class BoundQMLTextArea : public QObject, public BoundQMLItem
 {
 	Q_OBJECT
 	
-	enum TextType {Default, Lavaan, Model, Rcode};
+	enum TextType {Default, Lavaan, Model, Rcode, JAGSmodel};
 	
 public:
 	BoundQMLTextArea(QQuickItem* item, AnalysisForm* form);
@@ -44,8 +49,11 @@ public:
 	Option* boundTo()									override { return _boundTo; }
 	void	resetQMLItem(QQuickItem *item)				override;
 	void	rScriptDoneHandler(const QString &result)	override;
+	void	setJagsParameters();
 	
 	ListModelTermsAvailable* allVariablesModel() { return _allVariablesModel; }
+	
+	void	setModel(ListModel* model)			{ _modelParameter = model; }
 
 private slots:
 	void checkSyntax();
@@ -59,6 +67,8 @@ protected:
 	
 	LavaanSyntaxHighlighter*	_lavaanHighlighter = nullptr;
 	ListModelTermsAvailable*	_allVariablesModel = nullptr;
+	ListModel*					_modelParameter = nullptr;
+	
 };
 
 

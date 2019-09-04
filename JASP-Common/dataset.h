@@ -64,6 +64,7 @@ public:
 	void setSynchingData(bool newVal);
 
 	int	 getMaximumColumnWidthInCharacters(size_t columnIndex) const;
+	std::vector<std::string> getColumnNames() { return _columns.getColumnNames();};
 
 private:
 	Columns			_columns;

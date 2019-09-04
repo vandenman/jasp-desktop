@@ -20,6 +20,7 @@
 #include "../analysis/analysisform.h"
 #include "listmodel.h"
 #include "interactionmodel.h"
+#include "boundqmltextarea.h"
 
 #include <QQmlProperty>
 
@@ -99,7 +100,14 @@ void QMLListView::setUp()
 				}
 			}
 			else
-				addError(QString::fromLatin1("Unknown source model ") + sourceItem->name + QString::fromLatin1(" for VariableList ") + name());
+			{
+				BoundQMLTextArea* textAreaControl = dynamic_cast<BoundQMLTextArea*>(_form->getControl(sourceItem->name));
+				if (textAreaControl)
+					textAreaControl->setModel(listModel);
+				else
+					addError(QString::fromLatin1("Unknown source model ") + sourceItem->name + QString::fromLatin1(" for VariableList ") + name());
+				
+			}
 		}
 		
 		if (!termsAreVariables)

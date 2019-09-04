@@ -118,3 +118,10 @@ Column * Columns::createColumn(std::string name)
 	return column;
 }
 
+std::vector<std::string> Columns::getColumnNames()
+{
+	std::vector<std::string> columnNames;
+	for(Column &column : *this)
+		columnNames.push_back(column.name());
+	return columnNames;
+}
