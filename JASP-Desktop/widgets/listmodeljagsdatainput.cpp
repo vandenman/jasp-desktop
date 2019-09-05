@@ -18,7 +18,7 @@
 
 #include "log.h"
 #include "utilities/qutils.h"
-#include "ListModelJAGSDataInput.h"
+#include "listmodeljagsdatainput.h"
 #include "analysis/analysisform.h"
 #include "analysis/options/optionstring.h"
 #include "analysis/options/optionterm.h"

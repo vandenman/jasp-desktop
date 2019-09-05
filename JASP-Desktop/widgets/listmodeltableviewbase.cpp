@@ -109,39 +109,42 @@ void ListModelTableViewBase::removeColumn(size_t col)
 	emit modelChanged();
 }
 
-//void ListModelTableViewBase::addRow()
-//{
-//	beginResetModel();
+void ListModelTableViewBase::addRow()
+{
+	beginResetModel();
 
-//	if (rowCount() < _maxRow)
-//	{
-//		_rowNames.push_back(getRowName(rowCount()));
-//		_values.push_back(QVector<double>(_colNames.length(), 1));
-//		_rowCount++;
-//	}
+	if (rowCount() < _maxRow)
+	{
 
-//	endResetModel();
+		for (QVector<QVariant> & value : _values)
+			value.push_back(QVariant());
+		_rowNames.push_back(getRowName(rowCount()));
+		_rowCount++;
+	}
 
-//	emit rowCountChanged();
-//	emit modelChanged();
-//}
+	endResetModel();
 
-//void ListModelTableViewBase::removeRow(size_t row)
-//{
-//	beginResetModel();
+	emit rowCountChanged();
+	emit modelChanged();
+}
 
-//	if (row < rowCount())
-//	{
-//		_values.removeAt(int(row));
-//		_rowNames.pop_back();	
-//		_rowCount--;
-//	}
+void ListModelTableViewBase::removeRow(size_t row)
+{
+	beginResetModel();
 
-//	endResetModel();
+	if (row < rowCount())
+	{
+		for (QVector<QVariant> & value : _values)
+			value.removeAt(int(row));
+		_rowNames.pop_back();
+		_rowCount--;
+	}
 
-//	emit rowCountChanged();
-//	emit modelChanged();
-//}
+	endResetModel();
+
+	emit rowCountChanged();
+	emit modelChanged();
+}
 
 void ListModelTableViewBase::reset()
 {

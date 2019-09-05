@@ -31,7 +31,7 @@ public:
 
 	QString			getColName(size_t index)						override;
 	OptionsTable *	createOption()									override;
-	void			initValues(OptionsTable * bindHere)			override;
+	void			initValues(OptionsTable * bindHere)				override;
 
 public slots:
 	void sourceTermsChanged(Terms* termsAdded, Terms* termsRemoved)	override;
