@@ -3,9 +3,10 @@
 
 # from ggthemes::ggthemes_data
 JASPgraphs_data <- new.env()
-JASPgraphs_data[["colorblind"]][["value"]] <- c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2",
-  "#D55E00", "#CC79A7"
-)
+JASPgraphs_data[["colorblind"]][["value"]] <- c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+JASPgraphs_data[["viridis"]][["value"]] <- c("#FDE725FF", "#7AD151FF", "#22A884FF", "#2A788EFF", "#414487FF", "#440154FF")
+JASPgraphs_data[["viridis"]][["function"]] <- viridisLite::viridis
+JASPgraphs_data[["blue"]][["value"]] <- c("#d1e1ec", "#b3cde0", "#6497b1", "#005b96", "#03396c", "#011f4b")
 
 #'@title JASP color palettes
 #'@param n Number of colors desired.
@@ -49,24 +50,24 @@ JASPcolors <- function(n, palette = getGraphOption("palette")[["palette"]], asFu
 #'@rdname colors
 #'@export
 scale_JASPcolor_continuous <- function(palette = getGraphOption("palette")[["Function"]], ...) {
-  continuous_scale("color", "JASPcolor", palette, ...)
+  continuous_scale("color", "JASPcolor", JASPcolors(palette = palette, asFunction = TRUE), ...)
 }
 
 #'@rdname colors
 #'@export
 scale_JASPfill_continuous <- function(palette = getGraphOption("palette")[["Function"]], ...) {
-  continuous_scale("fill", "JASPcolor", palette, ...)
+  continuous_scale("fill", "JASPcolor", JASPcolors(palette = palette, asFunction = TRUE), ...)
 }
 
 #'@rdname colors
 #'@export
 scale_JASPcolor_discrete <- function(palette = getGraphOption("palette")[["Function"]], ...) {
-  discrete_scale("color", "JASPcolor", palette, ...)
+  discrete_scale("color", "JASPcolor", JASPcolors(palette = palette, asFunction = TRUE), ...)
 }
 
 #'@rdname colors
 #'@export
-scale_JASPfill_discrete <- function(palette = getGraphOption("palette")[["Function"]], ...) {
-  discrete_scale("fill", "JASPcolor", palette, ...)
+scale_JASPfill_discrete <- function(palette = getGraphOption("palette"), ...) {
+  discrete_scale("fill", "JASPcolor", JASPcolors(palette = palette, asFunction = TRUE), ...)
 }
 

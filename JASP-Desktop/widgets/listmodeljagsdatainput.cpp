@@ -18,12 +18,12 @@
 
 #include "log.h"
 #include "utilities/qutils.h"
-#include "listmodelmultinomialchi2test.h"
+#include "ListModelJAGSDataInput.h"
 #include "analysis/analysisform.h"
 #include "analysis/options/optionstring.h"
-#include "analysis/options/optiondoublearray.h"
+#include "analysis/options/optionterm.h"
 
-void ListModelMultinomialChi2Test::sourceTermsChanged(Terms *termsAdded, Terms *)
+void ListModelJAGSDataInput::sourceTermsChanged(Terms *termsAdded, Terms *)
 {
 	beginResetModel();
 
@@ -57,7 +57,7 @@ void ListModelMultinomialChi2Test::sourceTermsChanged(Terms *termsAdded, Terms *
 }
 
 
-QString ListModelMultinomialChi2Test::getColName(size_t index)
+QString ListModelJAGSDataInput::getColName(size_t index)
 {
 	if (_tableType == "PriorCounts")
 		return "Counts";
@@ -69,17 +69,17 @@ QString ListModelMultinomialChi2Test::getColName(size_t index)
 	return tq("H₀ (") + letter + tq(")");
 }
 
-OptionsTable *ListModelMultinomialChi2Test::createOption()
+OptionsTable *ListModelJAGSDataInput::createOption()
 {
 	Options* optsTemplate =		new Options();
 	optsTemplate->add("name",	new OptionString());
 	optsTemplate->add("levels", new OptionVariables());
-	optsTemplate->add("values", new OptionDoubleArray());
+	optsTemplate->add("values", new OptionTerm());
 
 	return new OptionsTable(optsTemplate);
 }
 
-void ListModelMultinomialChi2Test::initValues(OptionsTable * bindHere)
+void ListModelJAGSDataInput::initValues(OptionsTable * bindHere)
 {
 	_colNames.clear();
 	_rowNames.clear();
@@ -93,15 +93,15 @@ void ListModelMultinomialChi2Test::initValues(OptionsTable * bindHere)
 
 	for (Options * newRow : options)
 	{
-		OptionString		*	optionName		= static_cast<OptionString		*>(newRow->get("name"));
-								optionLevels	= static_cast<OptionVariables	*>(newRow->get("levels")); // why not store it once?
-		OptionDoubleArray	*	optionValues	= static_cast<OptionDoubleArray	*>(newRow->get("values"));
+		OptionString	*	optionName		= static_cast<OptionString		*>(newRow->get("name"));
+							optionLevels	= static_cast<OptionVariables	*>(newRow->get("levels")); // why not store it once?
+		OptionTerm		*	optionValues	= static_cast<OptionTerm		*>(newRow->get("values"));
 
 		_colNames.push_back(QString::fromStdString(optionName->value()));
 		//levels = optionLevels->variables(); //The old code (in boundqmltableview.cpp) seemed to specify to simply use the *last* OptionVariables called "levels" in the binding option. So I'll just repeat that despite not getting it.
 		_values.push_back({});
-		for (double val : optionValues->value())
-			_values[_values.size()-1].push_back(val);
+		for (const std::string & val : optionValues->term())
+			_values[_values.size()-1].push_back(tq(val));
 	}
 
 	if(optionLevels)
@@ -110,7 +110,7 @@ void ListModelMultinomialChi2Test::initValues(OptionsTable * bindHere)
 
 	//No need to check colnames to cols in values because they are created during the same loop and thus crash if non-matching somehow
 	if (_values.size() > 0 && int(_values[0].size()) != _rowNames.size())
-		addError("Number of rows specifed in Options for ListModelMultinomialChi2Test does not match number of rows in values!");
+		addError("Number of rows specifed in Options for ListModelJAGSDataInput does not match number of rows in values!");
 
 
 	beginResetModel();
@@ -120,7 +120,7 @@ void ListModelMultinomialChi2Test::initValues(OptionsTable * bindHere)
 	for(auto & col : _values)
 		if(_rowNames.size() < col.size())
 		{
-			Log::log() << "Too many rows in a column of OptionsTable for ListModelMultinomialChi2Test! Shrinking column to fit." << std::endl;
+			Log::log() << "Too many rows in a column of OptionsTable for ListModelJAGSDataInput! Shrinking column to fit." << std::endl;
 			col.resize(_rowNames.size());
 		}
 		else
@@ -135,7 +135,7 @@ void ListModelMultinomialChi2Test::initValues(OptionsTable * bindHere)
 	emit rowCountChanged();
 }
 
-void ListModelMultinomialChi2Test::modelChangedSlot() // Should move this to listmodeltableviewbase as well probably? And also connect columnCount and colNames etc
+void ListModelJAGSDataInput::modelChangedSlot() // Should move this to listmodeltableviewbase as well probably? And also connect columnCount and colNames etc
 {
 	if (_boundTo)
 	{
@@ -150,11 +150,11 @@ void ListModelMultinomialChi2Test::modelChangedSlot() // Should move this to lis
 			Options* options =		new Options();
 			options->add("name",	new OptionString(_colNames[colIndex].toStdString()));
 			options->add("levels",	new OptionVariables(stdlevels));
-
-			std::vector<double> tempValues;
+			
+			std::vector<std::string> tempValues;
 			for (QVariant val : _values[colIndex].toStdVector())
-				tempValues.push_back(val.toDouble());
-			options->add("values",	new OptionDoubleArray(tempValues));
+				tempValues.push_back(val.toString().toStdString());
+			options->add("values",	new OptionTerm(tempValues));
 
 			allOptions.push_back(options);
 		}
