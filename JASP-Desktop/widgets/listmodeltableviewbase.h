@@ -50,8 +50,8 @@ public:
 
 				void				addColumn();
 				void				removeColumn(size_t index);
-//				void				addRow();
-//				void				removeRow(size_t index);
+				void				addRow();
+				void				removeRow(size_t index);
 				void				reset();
 	virtual		void				itemChanged(int column, int row, QVariant value);
 	virtual		void				refreshModel()							{ return ListModel::refresh(); }
