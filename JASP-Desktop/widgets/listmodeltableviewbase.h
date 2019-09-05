@@ -50,17 +50,20 @@ public:
 
 				void				addColumn();
 				void				removeColumn(size_t index);
+//				void				addRow();
+//				void				removeRow(size_t index);
 				void				reset();
-	virtual		void				itemChanged(int column, int row, double value);
-	virtual		void				refreshModel() { return ListModel::refresh(); }
-	virtual		void				initValues(OptionsTable * bindHere)		{}
+	virtual		void				itemChanged(int column, int row, QVariant value);
+	virtual		void				refreshModel()							{ return ListModel::refresh(); }
+	virtual		void				initValues(OptionsTable * bindHere)	{}
 	virtual		QString				getColName(size_t index)				{ return "Col " + QString::fromStdString(std::to_string(index)); }
+	virtual		QString				getRowName(size_t index)				{ return "Row " + QString::fromStdString(std::to_string(index)); }
 	virtual		OptionsTable *		createOption()							{ return new OptionsTable(); }
-	virtual		void				modelChangedSlot()						{}
+	virtual		void				modelChangedSlot()					{}
 
-				const QVector<QVector<double> >	&	values()	const { return _values;		}
-				const QVector<QString>			&	rowNames()	const { return _rowNames;	}
-				const QVector<QString>			&	colNames()	const { return _colNames;	}
+				const QVector<QVector<QVariant>>	&	values()	const { return _values;		}
+				const QVector<QString>				&	rowNames()	const { return _rowNames;	}
+				const QVector<QString>				&	colNames()	const { return _colNames;	}
 
 				void runRScript(		const QString & script);
 	virtual		void rScriptDoneHandler(const QString & result) { throw std::runtime_error("runRScript done but handler not implemented!\nImplement an override for RScriptDoneHandler and usesRScript\nResult was: "+result.toStdString()); }
@@ -75,13 +78,15 @@ protected:
 	BoundQMLTableView		*	_tableView		= nullptr;
 	OptionsTable			*	_boundTo		= nullptr;
 
-	const size_t				_maxColumn		= 10;
+	const size_t				_maxColumn		= 10,
+								_maxRow			= 100;
 	QVector<QString>			_rowNames,
 								_colNames;
-	QVector<QVector<double> >	_values;
+	QVector<QVector<QVariant> >	_values;
 	int							_rowSelected	= -1;
 	QString						_tableType;
-	size_t						_columnCount	= 0;
+	size_t						_columnCount	= 0,
+								_rowCount		= 0;
 };
 
 #endif // LISTMODELTABLEVIEWBASE_H

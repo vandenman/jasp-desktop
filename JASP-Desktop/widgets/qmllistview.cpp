@@ -24,7 +24,6 @@
 
 #include <QQmlProperty>
 
-
 QMLListView::QMLListView(QQuickItem *item, AnalysisForm *form) 
 	: QObject(form)
 	, _needsSourceModels(false)
@@ -106,7 +105,6 @@ void QMLListView::setUp()
 					textAreaControl->setModel(listModel);
 				else
 					addError(QString::fromLatin1("Unknown source model ") + sourceItem->name + QString::fromLatin1(" for VariableList ") + name());
-				
 			}
 		}
 		

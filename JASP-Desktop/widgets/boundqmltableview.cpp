@@ -22,6 +22,7 @@
 #include "analysis/options/optionvariables.h"
 #include "analysis/options/optionstring.h"
 #include "listmodelmultinomialchi2test.h"
+#include "listmodeljagsdatainput.h"
 #include "listmodelfiltereddataentry.h"
 #include <QQmlProperty>
 #include <QQuickItem>
@@ -38,6 +39,7 @@ BoundQMLTableView::BoundQMLTableView(QQuickItem* item, AnalysisForm* form)
 			tableType = _item->property("tableType").toString();
 
 	if (modelType == "MultinomialChi2Model")	_tableModel	= new ListModelMultinomialChi2Test(	this, tableType);
+	if (modelType == "JAGSDataInputModel")		_tableModel	= new ListModelJAGSDataInput(		this, tableType);
 	if (modelType == "FilteredDataEntryModel")	_tableModel = new ListModelFilteredDataEntry(	this, tableType);
 
 	if(!_tableModel) addError("No model specified for TableView!");
