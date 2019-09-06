@@ -53,7 +53,7 @@ public:
 	
 	ListModelTermsAvailable* allVariablesModel() { return _allVariablesModel; }
 	
-	void	setModel(ListModel* model)			{ _modelParameter = model; }
+	void	setModel(ListModel* model)			{ _modelParameter.push_back(model); }
 
 private slots:
 	void checkSyntax();
@@ -67,7 +67,7 @@ protected:
 	
 	LavaanSyntaxHighlighter*	_lavaanHighlighter = nullptr;
 	ListModelTermsAvailable*	_allVariablesModel = nullptr;
-	ListModel*					_modelParameter = nullptr;
+	QVector<ListModel*>			_modelParameter;
 	
 };
 
