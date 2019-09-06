@@ -58,6 +58,9 @@ public:
 
 protected slots:
 	virtual void modelChangedHandler() {} // Model has changed: change the options
+			void sourceChangedHandler();
+			
+	virtual void setSources(QQuickItem *item);
 
 protected:
 	QList<SourceType*>	_sourceModels;

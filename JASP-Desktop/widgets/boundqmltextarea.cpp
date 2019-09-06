@@ -301,8 +301,8 @@ void BoundQMLTextArea::setJagsParameters()
 			qInfo() << "excluded: " << parameter;
 		}
 	}
-	if (_modelParameter)
-		_modelParameter->initTerms(parameters.toList());
-	else
-		qInfo() << "No model Parameter view";
+	for (ListModel* model : _modelParameter)
+		model->initTerms(parameters.toList());
+//	else
+//		qInfo() << "No model Parameter view";
 }

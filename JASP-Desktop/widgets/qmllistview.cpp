@@ -21,7 +21,7 @@
 #include "listmodel.h"
 #include "interactionmodel.h"
 #include "boundqmltextarea.h"
-
+#include "log.h"
 #include <QQmlProperty>
 
 QMLListView::QMLListView(QQuickItem *item, AnalysisForm *form) 
@@ -29,7 +29,13 @@ QMLListView::QMLListView(QQuickItem *item, AnalysisForm *form)
 	, _needsSourceModels(false)
 	  
 {
-	_setAllowedVariables();	
+	_setAllowedVariables();
+	setSources(item);
+}
+
+void QMLListView::setSources(QQuickItem *item)
+{
+	_sourceModels.clear();
 	QList<QVariant> sources = getItemProperty("source").toList();
 	
 	if (sources.isEmpty())
@@ -57,6 +63,9 @@ QMLListView::QMLListView(QQuickItem *item, AnalysisForm *form)
 			}
 		}
 	}
+	
+	Log::log() << "Set Sources" << std::endl;
+	QQuickItem::connect(item, SIGNAL(sourceChangedSignal()), this, SLOT(sourceChangedHandler()));	
 }
 
 void QMLListView::setUp()
@@ -115,7 +124,7 @@ void QMLListView::setUp()
 	}
 
 	connect(listModel, &ListModel::modelChanged, this, &QMLListView::modelChangedHandler);
-	setItemProperty("model", QVariant::fromValue(listModel));
+	setItemProperty("model", QVariant::fromValue(listModel));	
 }
 
 void QMLListView::cleanUp()
@@ -135,6 +144,17 @@ void QMLListView::setTermsAreNotVariables()
 void QMLListView::setTermsAreInteractions()
 {
 	model()->setTermsAreInteractions(true);
+}
+
+void QMLListView::sourceChangedHandler()
+{
+	Log::log() << "Source Changed!!" << std::endl;
+	if (_item)
+	{
+		setSources(_item);
+		setUp();
+		modelChangedHandler();
+	}
 }
 
 int QMLListView::_getAllowedColumnsTypes()
