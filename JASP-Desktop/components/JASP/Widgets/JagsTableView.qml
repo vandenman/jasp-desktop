@@ -33,7 +33,7 @@ Item
 	property	alias	tableView			: tableView
 	property	alias	showAddButton		: addButton.visible
 	property	alias	showDeleteButton	: deleteButton.visible
-	property	string	tableType			: "JAGSparameters"
+	property	string	tableType			: "userDataInput"
 	property	string	itemType			: "string"
 	property	int		maxDataEntries  	: 30
 
@@ -44,7 +44,7 @@ Item
 		TableView
 		{
 			id				: tableView
-			implicitWidth	: jagsTableView.width * 3 / 4 - layout.spacing
+            implicitWidth	: jagsTableView.tableType == "userDataInput" ? jagsTableView.width * 3 / 4 - layout.spacing : jagsTableView.width
 			implicitHeight	: jagsTableView.height
 			modelType		: "JAGSDataInputModel"
 			itemType		: jagsTableView.itemType
@@ -53,6 +53,7 @@ Item
 
 		Group
 		{
+            visible         : jagsTableView.tableType == "userDataInput"
 			implicitWidth	: jagsTableView.width * 1 / 4
 			implicitHeight	: jagsTableView.height
 
