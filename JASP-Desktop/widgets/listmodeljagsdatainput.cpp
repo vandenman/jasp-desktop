@@ -59,14 +59,15 @@ void ListModelJAGSDataInput::sourceTermsChanged(Terms *termsAdded, Terms *)
 
 QString ListModelJAGSDataInput::getColName(size_t index)
 {
-	if (_tableType == "PriorCounts")
-		return "Counts";
+	if(index == 0)
+		return "Parameter";
+	return "R Code";
+}
 
-	if (index >= _maxColumn)
-		index = _maxColumn - 1;
 
-	char letter = char(97 + index);
-	return tq("H₀ (") + letter + tq(")");
+int ListModelJAGSDataInput::getMaximumColumnWidthInCharacters(size_t columnIndex) const
+{
+	return columnIndex == 0 ? 6 : 25;
 }
 
 OptionsTable *ListModelJAGSDataInput::createOption()
@@ -76,7 +77,35 @@ OptionsTable *ListModelJAGSDataInput::createOption()
 	optsTemplate->add("levels", new OptionVariables());
 	optsTemplate->add("values", new OptionTerm());
 
-	return new OptionsTable(optsTemplate);
+
+	OptionsTable * returnThis = new OptionsTable(optsTemplate);
+
+	if(_initialColCnt > 0)
+	{
+		std::vector<std::string> stdlevels;
+		for (int row=0; row<_initialRowCnt; row++)
+			stdlevels.push_back(fq(getRowName(row)));
+
+		std::vector<Options*> allOptions;
+
+		for (int colIndex = 0; colIndex < _initialColCnt; colIndex++)
+		{
+			Options* options =		new Options();
+			options->add("name",	new OptionString(fq(getColName(colIndex))));
+			options->add("levels",	new OptionVariables(stdlevels));
+
+			std::vector<std::string> tempValues;
+			for (const auto & level: stdlevels)
+				tempValues.push_back("...");
+			options->add("values",	new OptionTerm(tempValues));
+
+			allOptions.push_back(options);
+		}
+
+		returnThis->setValue(allOptions);
+	}
+
+	return returnThis;
 }
 
 void ListModelJAGSDataInput::initValues(OptionsTable * bindHere)
@@ -157,6 +186,7 @@ void ListModelJAGSDataInput::modelChangedSlot() // Should move this to listmodel
 			options->add("values",	new OptionTerm(tempValues));
 
 			allOptions.push_back(options);
+
 		}
 
 		_boundTo->setValue(allOptions);

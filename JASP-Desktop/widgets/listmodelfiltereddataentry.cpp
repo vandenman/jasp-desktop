@@ -12,9 +12,11 @@ ListModelFilteredDataEntry::ListModelFilteredDataEntry(BoundQMLTableView * paren
 {
 	setAcceptedRowsTrue();
 
-	setFilter(_tableView->getItemProperty("filter").toString());
-	setColName(_tableView->getItemProperty("colName").toString());
+	setFilter(	_tableView->getItemProperty("filter").toString());
+	setColName(	_tableView->getItemProperty("colName").toString());
 	setExtraCol(_tableView->getItemProperty("extraCol").toString());
+
+	_tableView->setItemProperty("itemType", "double"); //Force itemtype to be double
 
 	connect(this,				&ListModelFilteredDataEntry::filterChanged,		this, &ListModelFilteredDataEntry::runFilter										);
 	connect(_tableView->item(), SIGNAL(filterSignal(QString)),					this, SLOT(setFilter(QString))														);
@@ -116,7 +118,7 @@ void ListModelFilteredDataEntry::setAcceptedRows(std::vector<bool> newRows)
 
 void ListModelFilteredDataEntry::itemChanged(int column, int row, QVariant value)
 {
-	if(column != _editableColumn || value.type() != QMetaType::Double)
+	if(column != _editableColumn)
 		return;
 
 	//std::cout << "ListModelFilteredDataEntry::itemChanged(" << column << ", " << row << ", " << value << ")" << std::endl;
@@ -126,8 +128,8 @@ void ListModelFilteredDataEntry::itemChanged(int column, int row, QVariant value
 	{
 		if (_values[0][row] != value)
 		{
-			bool gotLarger							= QVariant(_values[0][row]).toString().size() != QVariant(value).toString().size();
-			_values[0][row]							= value;
+			bool gotLarger							= _values[0][row].toString().size() != value.toString().size();
+			_values[0][row]							= value.toDouble();
 			_enteredValues[_filteredRowToData[row]] = value.toDouble();
 
 			emit dataChanged(index(row, column), index(row, column), { Qt::DisplayRole });
@@ -172,8 +174,6 @@ void ListModelFilteredDataEntry::sourceTermsChanged(Terms *, Terms *)
 
 OptionsTable * ListModelFilteredDataEntry::createOption()
 {
-	//std::cout << "" << std::endl;
-
 	Options* optsTemplate =			new Options();
 	optsTemplate->add("colName",	new OptionString());
 	optsTemplate->add("filter",		new OptionString());

@@ -168,9 +168,9 @@ protected:
 
 private:
 	void					optionsChangedHandler(Option *option = nullptr);
-	ComputedColumn *		requestComputedColumnCreationHandler(std::string columnName)		{ return requestComputedColumnCreation(QString::fromStdString(columnName), this); }
-	void					requestColumnCreationHandler(std::string columnName, int colType)	{ return requestColumnCreation(QString::fromStdString(columnName), this, colType); }
-	void					requestComputedColumnDestructionHandler(std::string columnName)		{ requestComputedColumnDestruction(QString::fromStdString(columnName)); }
+	ComputedColumn *		requestComputedColumnCreationHandler(std::string columnName);
+	void					requestColumnCreationHandler(std::string columnName, int colType);
+	void					requestComputedColumnDestructionHandler(std::string columnName);
 
 protected:
 	Status					_status			= Initializing;

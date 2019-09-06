@@ -82,7 +82,7 @@ void ListModelTableViewBase::addColumn()
 	if (columnCount() < _maxColumn)
 	{
 		_colNames.push_back(getColName(columnCount()));
-		_values.push_back(QVector<QVariant>(_rowNames.length(), 1));
+		_values.push_back(QVector<QVariant>(_rowNames.length(), _defaultCellVal));
 		_columnCount++;
 	}
 
@@ -115,11 +115,12 @@ void ListModelTableViewBase::addRow()
 
 	if (rowCount() < _maxRow)
 	{
-
-		for (QVector<QVariant> & value : _values)
-			value.push_back(QVariant());
 		_rowNames.push_back(getRowName(rowCount()));
 		_rowCount++;
+
+		for (QVector<QVariant> & value : _values)
+			while(value.size() < _rowCount) //Lets make sure the data is rectangular!
+				value.push_back(_defaultCellVal);
 	}
 
 	endResetModel();
@@ -136,7 +137,7 @@ void ListModelTableViewBase::removeRow(size_t row)
 	{
 		for (QVector<QVariant> & value : _values)
 			value.removeAt(int(row));
-		_rowNames.pop_back();
+		_rowNames.pop_back(); //Should we remove the exact right rowName? Or I guess there just generated row for row in the base..
 		_rowCount--;
 	}
 
@@ -151,21 +152,23 @@ void ListModelTableViewBase::reset()
 	beginResetModel();
 
 	_colNames.clear();
+	_rowNames.clear();
 	_values.clear();
+	_columnCount	= 0;
+	_rowCount		= 0;
 
-	if (_rowNames.length() > 0)
-	{
-		QVector<QVariant> newValues(_rowNames.length(), 1);
-		_values.push_back(newValues);
-		_colNames.push_back(getColName(0));
-		_columnCount = 1;
-	}
-	else
-		_columnCount = 0;
+	for(size_t col; col < _initialColCnt; col++)
+		addColumn();
+
+	size_t rows = std::max(size_t(_rowNames.length()), _initialRowCnt);
+
+	for(size_t row=0; row < rows; row++)
+		addRow();
 
 	endResetModel();
 
 	emit columnCountChanged();
+	emit rowCountChanged();
 	emit modelChanged();
 }
 
@@ -176,8 +179,8 @@ void ListModelTableViewBase::itemChanged(int column, int row, QVariant value)
 	{
 		if (_values[column][row] != value)
 		{
-			bool gotLarger = QVariant(_values[column][row]).toString().size() != QVariant(value).toString().size();
-			_values[column][row] = value;
+			bool gotLarger = _values[column][row].toString().size() != value.toString().size();
+			_values[column][row] = _itemType == "integer" ? value.toInt() : _itemType == "double" ? value.toDouble() : value;
 
 			emit dataChanged(index(row, column), index(row, column), { Qt::DisplayRole });
 			emit modelChanged();
@@ -236,4 +239,14 @@ Qt::ItemFlags ListModelTableViewBase::flags(const QModelIndex &) const
 void ListModelTableViewBase::runRScript(const QString & script)
 {
 	_tableView->runRScript(script);
+}
+
+bool ListModelTableViewBase::valueOk(QVariant value)
+{
+	bool	ok	= true;
+
+	if		(_itemType == "double")		value.toDouble(&ok);
+	else if	(_itemType == "integer")	value.toInt(&ok);
+
+	return ok;
 }

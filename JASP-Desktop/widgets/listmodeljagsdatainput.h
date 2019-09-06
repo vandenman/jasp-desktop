@@ -27,7 +27,12 @@ class ListModelJAGSDataInput : public ListModelTableViewBase
 	Q_OBJECT
 
 public:
-	explicit ListModelJAGSDataInput(BoundQMLTableView * parent, QString tableType) : ListModelTableViewBase(parent, tableType) {}
+	explicit ListModelJAGSDataInput(BoundQMLTableView * parent, QString tableType) : ListModelTableViewBase(parent, tableType)
+	{
+		_defaultCellVal = "...";
+	}
+
+	int getMaximumColumnWidthInCharacters(size_t columnIndex) const	override;
 
 	QString			getColName(size_t index)						override;
 	OptionsTable *	createOption()									override;

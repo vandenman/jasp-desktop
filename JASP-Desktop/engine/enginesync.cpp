@@ -121,8 +121,8 @@ void EngineSync::start(int ppi)
 	QTimer	*timerProcess	= new QTimer(this),
 			*timerBeat		= new QTimer(this);
 
-	connect(timerProcess,	&QTimer::timeout, this, &EngineSync::process);
-	connect(timerBeat,		&QTimer::timeout, this, &EngineSync::heartbeatTempFiles);
+	connect(timerProcess,	&QTimer::timeout, this, &EngineSync::process,				Qt::QueuedConnection);
+	connect(timerBeat,		&QTimer::timeout, this, &EngineSync::heartbeatTempFiles,	Qt::QueuedConnection);
 
 	timerProcess->start(50);
 	timerBeat->start(30000);

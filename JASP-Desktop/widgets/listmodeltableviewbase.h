@@ -53,6 +53,8 @@ public:
 				void				addRow();
 				void				removeRow(size_t index);
 				void				reset();
+				void				setInitialColumnCount(	size_t initialColumnCount)	{ _initialColCnt = initialColumnCount;	}
+				void				setInitialRowCount(		size_t initialRowCount)		{ _initialRowCnt = initialRowCount;		}
 	virtual		void				itemChanged(int column, int row, QVariant value);
 	virtual		void				refreshModel()							{ return ListModel::refresh(); }
 	virtual		void				initValues(OptionsTable * bindHere)	{}
@@ -67,6 +69,8 @@ public:
 
 				void runRScript(		const QString & script);
 	virtual		void rScriptDoneHandler(const QString & result) { throw std::runtime_error("runRScript done but handler not implemented!\nImplement an override for RScriptDoneHandler and usesRScript\nResult was: "+result.toStdString()); }
+
+				bool valueOk(QVariant value);
 
 signals:
 	void columnCountChanged();
@@ -86,7 +90,10 @@ protected:
 	int							_rowSelected	= -1;
 	QString						_tableType;
 	size_t						_columnCount	= 0,
-								_rowCount		= 0;
+								_rowCount		= 0,
+								_initialColCnt	= 0,
+								_initialRowCnt	= 0;
+	QVariant					_defaultCellVal;
 };
 
 #endif // LISTMODELTABLEVIEWBASE_H
