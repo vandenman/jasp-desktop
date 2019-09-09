@@ -23,8 +23,8 @@ import JASP.Controls 1.0
 Item
 {
 	id				: jagsTableView
-	width			: parent.width
-	implicitWidth	: width
+	width			: implicitWidth
+	implicitWidth	: parent.width
 	height			: implicitHeight
 	implicitHeight	: 200 * preferencesModel.uiScale
 
@@ -43,12 +43,14 @@ Item
 
 		TableView
 		{
-			id				: tableView
-            implicitWidth	: jagsTableView.tableType == "userDataInput" ? jagsTableView.width * 3 / 4 - layout.spacing : jagsTableView.width
-			implicitHeight	: jagsTableView.height
-			modelType		: "JAGSDataInputModel"
-			itemType		: jagsTableView.itemType
-			tableType		: jagsTableView.tableType
+			id					: tableView
+			implicitWidth		: jagsTableView.tableType == "userDataInput" ? jagsTableView.width * 3 / 4 - layout.spacing : jagsTableView.width
+			implicitHeight		: jagsTableView.height
+			modelType			: "JAGSDataInputModel"
+			itemType			: jagsTableView.itemType
+			tableType			: jagsTableView.tableType
+			initialColumnCount	: 2
+			initialRowCount		: 0
 		}
 
 		Group
@@ -63,8 +65,8 @@ Item
 				text			: qsTr("Add Data")
 				name			: "addButton"
 				control.width	: jagsTableView.width * 1 / 4
-				onClicked		: tableView.addColumn()
-				enabled			: (tableView.rowCount > 0 && tableView.rowCount < maxDataEntries)
+				onClicked		: tableView.addRow()
+				enabled			: (tableView.columnCount > 0 && tableView.rowCount < maxDataEntries)
 			}
 
 			Button
@@ -73,7 +75,7 @@ Item
 				text			: qsTr("Delete Data")
 				name			: "deleteButton"
 				control.width	: jagsTableView.width * 1 / 4
-				onClicked		: tableView.removeAColumn()
+				onClicked		: tableView.removeARow()
 				enabled			: tableView.rowCount > 1
 			}
 

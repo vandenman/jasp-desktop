@@ -101,7 +101,7 @@ void ListModelMultinomialChi2Test::initValues(OptionsTable * bindHere)
 		//levels = optionLevels->variables(); //The old code (in boundqmltableview.cpp) seemed to specify to simply use the *last* OptionVariables called "levels" in the binding option. So I'll just repeat that despite not getting it.
 		_values.push_back({});
 		for (double val : optionValues->value())
-			_values[_values.size()-1].push_back(val);
+			_values[_values.size()-1].push_back(_itemType == "integer" ? round(val) : val);
 	}
 
 	if(optionLevels)

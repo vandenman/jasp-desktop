@@ -27,7 +27,7 @@
 #include "analyses.h"
 #include "analysisform.h"
 #include "utilities/qutils.h"
-
+#include "log.h"
 
 
 Analysis::Analysis(Analyses* analyses, size_t id, std::string module, std::string name, std::string title, const Version &version, Json::Value *data) :
@@ -410,4 +410,25 @@ QString	Analysis::fullHelpPath(QString helpFileName)
 {
 	if(isDynamicModule())	return dynamicModule()->helpFolderPath() + helpFileName;
 	else					return "analyses/" + helpFileName;
+}
+
+ComputedColumn * Analysis::requestComputedColumnCreationHandler(std::string columnName)
+{
+	Log::log() << "Analysis::requestComputedColumnCreationHandler(" << columnName << ")" << std::endl;
+
+	return requestComputedColumnCreation(QString::fromStdString(columnName), this);
+}
+
+void Analysis::requestColumnCreationHandler(std::string columnName, int colType)
+{
+	Log::log() << "Analysis::requestColumnCreationHandler(" << columnName << ", " << colType << ")" << std::endl;
+
+	return requestColumnCreation(QString::fromStdString(columnName), this, colType);
+}
+
+void Analysis::requestComputedColumnDestructionHandler(std::string columnName)
+{
+	Log::log() << "Analysis::requestComputedColumnDestructionHandler(" << columnName << ")" << std::endl;
+
+	requestComputedColumnDestruction(QString::fromStdString(columnName));
 }
