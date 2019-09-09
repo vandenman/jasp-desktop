@@ -30,10 +30,9 @@ QMLListView::QMLListView(QQuickItem *item, AnalysisForm *form)
 	  
 {
 	_setAllowedVariables();
-	setSources(item);
 }
 
-void QMLListView::setSources(QQuickItem *item)
+void QMLListView::setSources()
 {
 	_sourceModels.clear();
 	QList<QVariant> sources = getItemProperty("source").toList();
@@ -64,18 +63,8 @@ void QMLListView::setSources(QQuickItem *item)
 		}
 	}
 	
-	Log::log() << "Set Sources" << std::endl;
-	QQuickItem::connect(item, SIGNAL(sourceChangedSignal()), this, SLOT(sourceChangedHandler()));	
-}
-
-void QMLListView::setUp()
-{
-	QMLItem::setUp();
-	
 	ListModel* listModel = model();
-	if (!listModel)
-		return;
-	
+
 	if (_sourceModels.isEmpty())
 	{
 		if (_needsSourceModels)
@@ -97,7 +86,7 @@ void QMLListView::setUp()
 				sourceItem->model = sourceModel;
 				addDependency(sourceModel->listView());
 				connect(sourceModel, &ListModel::modelChanged, listModel, &ListModel::sourceTermsChanged);
-				
+
 				if (!sourceItem->discard.isEmpty())
 				{
 					ListModel* discardModel = _form->getModel(sourceItem->discard);
@@ -108,20 +97,28 @@ void QMLListView::setUp()
 				}
 			}
 			else
-			{
-				BoundQMLTextArea* textAreaControl = dynamic_cast<BoundQMLTextArea*>(_form->getControl(sourceItem->name));
-				if (textAreaControl)
-					textAreaControl->setModel(listModel);
-				else
-					addError(QString::fromLatin1("Unknown source model ") + sourceItem->name + QString::fromLatin1(" for VariableList ") + name());
-			}
+				addError(tr("Cannot find source %1 for VariablesList %2").arg(sourceItem->name).arg(name()));
 		}
-		
+
 		if (!termsAreVariables)
 			setTermsAreNotVariables(); // set it only when it is false
 		if (termsAreInteractions)
 			setTermsAreInteractions(); // set it only when it is true
 	}
+
+}
+
+void QMLListView::setUp()
+{
+	QMLItem::setUp();
+	
+	ListModel* listModel = model();
+	if (!listModel)
+		return;
+	setSources();
+
+	if (!getItemProperty("source").isNull())
+		QQuickItem::connect(_item, SIGNAL(sourceChanged()), this, SLOT(sourceChangedHandler()));
 
 	connect(listModel, &ListModel::modelChanged, this, &QMLListView::modelChangedHandler);
 	setItemProperty("model", QVariant::fromValue(listModel));	
@@ -148,13 +145,25 @@ void QMLListView::setTermsAreInteractions()
 
 void QMLListView::sourceChangedHandler()
 {
-	Log::log() << "Source Changed!!" << std::endl;
-	if (_item)
+	if (getItemProperty("source").isNull())
+		return;
+
+	ListModel* listModel = model();
+	if (!listModel)
+		return;
+
+	for (SourceType* sourceItem : _sourceModels)
 	{
-		setSources(_item);
-		setUp();
-		modelChangedHandler();
+		ListModel* sourceModel = sourceItem->model;
+		if (sourceModel)
+		{
+			removeDependency(sourceModel->listView());
+			disconnect(sourceModel, &ListModel::modelChanged, listModel, &ListModel::sourceTermsChanged);
+		}
 	}
+
+	setSources();
+	listModel->sourceTermsChanged(nullptr, nullptr);
 }
 
 int QMLListView::_getAllowedColumnsTypes()

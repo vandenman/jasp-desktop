@@ -79,8 +79,7 @@ JASPControl
 	signal itemsDropped(var indexes, var dropList, int dropItemIndex, string assignOption);
 	signal hasSelectedItemsChanged();
 	signal draggingChanged(var context, bool dragging);
-    signal sourceChangedSignal();
-    
+
 	function setSelectedItems()
 	{
 		var items = listView.getExistingItems()
