@@ -33,9 +33,10 @@
 
 #include "log.h"
 
-
-BoundQMLTextArea::BoundQMLTextArea(QQuickItem* item, AnalysisForm* form) 
-	: QMLItem(item, form), QObject(form), BoundQMLItem()
+BoundQMLTextArea::BoundQMLTextArea(QQuickItem* item, AnalysisForm* form)
+	: QMLItem(item, form)
+	, QMLListView(item, form)
+	, BoundQMLItem()
 {
 
 	QString textType = _item->property("textType").toString();
@@ -45,8 +46,8 @@ BoundQMLTextArea::BoundQMLTextArea(QQuickItem* item, AnalysisForm* form)
 		connect(_form, &AnalysisForm::dataSetChanged,	this, &BoundQMLTextArea::dataSetChangedHandler,	Qt::QueuedConnection	);
 
 		_textType = TextType::Lavaan;
-		QMLListViewTermsAvailable* listView = new QMLListViewTermsAvailable(item, form); // Hack to get allVariablesModel
-		_allVariablesModel = dynamic_cast<ListModelTermsAvailable*>(listView->model());
+		_model = new ListModelTermsAvailable(this);
+		_modelHasAllVariables = true;
 #ifdef __APPLE__
 		_applyScriptInfo = "\u2318 + Enter to apply";
 #else
@@ -134,7 +135,8 @@ BoundQMLTextArea::BoundQMLTextArea(QQuickItem* item, AnalysisForm* form)
 		font.setStyleHint(QFont::Monospace);
 		font.setPointSize(10);
 		_item->setProperty("font", font);
-			
+		_model = new ListModelTermsAvailable(this);
+		_model->setTermsAreVariables(false);
 	}
 	else
 		_textType = TextType::Default;
@@ -188,9 +190,9 @@ void BoundQMLTextArea::checkSyntax()
 		// TODO: Proper handling of end-of-string characters and funny colnames
 		QString colNames = "c(";
 		bool firstCol = true;
-		if (_allVariablesModel)
+		if (_model)
 		{
-			QList<QString> vars = _allVariablesModel->allTerms().asQList();
+			QList<QString> vars = _model->allTerms().asQList();
 			for (QString &var : vars)
 			{
 				if (!firstCol)
@@ -301,8 +303,11 @@ void BoundQMLTextArea::setJagsParameters()
 			qInfo() << "excluded: " << parameter;
 		}
 	}
-	for (ListModel* model : _modelParameter)
-		model->initTerms(parameters.toList());
+	if (_model)
+	{
+		_model->initTerms(parameters.toList());
+		emit _model->modelChanged();
+	}
 //	else
 //		qInfo() << "No model Parameter view";
 }

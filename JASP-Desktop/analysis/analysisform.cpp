@@ -184,10 +184,14 @@ void AnalysisForm::_parseQML()
 		{
 			BoundQMLTextArea* boundQMLTextArea = new BoundQMLTextArea(quickItem,	this);
 			control = boundQMLTextArea;
-			ListModelTermsAvailable* allVariablesModel = boundQMLTextArea->allVariablesModel();
+			ListModelTermsAvailable* availableModel = dynamic_cast<ListModelTermsAvailable*>(boundQMLTextArea->model());
 
-			if (allVariablesModel)
-				_allAvailableVariablesModels.push_back(allVariablesModel);
+			if (availableModel)
+			{
+				if (boundQMLTextArea->modelHasAllVariables())
+					_allAvailableVariablesModels.push_back(availableModel);
+				_modelMap[controlName] = availableModel;
+			}
 
 			break;
 		}
@@ -198,8 +202,9 @@ void AnalysisForm::_parseQML()
 			ListModelTermsAvailable* availableModel = dynamic_cast<ListModelTermsAvailable*>(boundQMLComboBox->model());
 			if (availableModel)
 			{
-				if (boundQMLComboBox->hasAllVariablesModel)
+				if (boundQMLComboBox->modelHasAllVariables())
 					_allAvailableVariablesModels.push_back(availableModel);
+				_modelMap[controlName] = availableModel;
 			}
 			break;
 		}
