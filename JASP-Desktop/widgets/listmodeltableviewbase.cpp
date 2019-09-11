@@ -191,6 +191,53 @@ void ListModelTableViewBase::itemChanged(int column, int row, QVariant value)
 	}
 }
 
+const Terms &ListModelTableViewBase::terms(const QString &what)
+{
+	_tempTerms.clear();
+	int colNb = -1;
+	if (what.isEmpty() && _values.length() == 1)
+		colNb = 0;
+	else if (!what.isEmpty())
+	{
+		colNb = _colNames.indexOf(what);
+		if (colNb == -1 && what.startsWith("column"))
+		{
+			QString tempWhat = what;
+			QString colNbStr = tempWhat.remove("column");
+			bool ok = false;
+			colNb = colNbStr.toInt(&ok);
+			if (!ok) colNb = -1;
+			if (colNb > 0) colNb--;
+		}
+	}
+
+	if (colNb >= 0)
+	{
+		if (_values.length() > colNb)
+		{
+			const QVector<QVariant> firstCol = _values[colNb];
+			for (const QVariant& val : firstCol)
+			{
+				QString value = val.toString();
+				if (!value.isEmpty() && value != "...")
+					_tempTerms.add(val.toString());
+			}
+		}
+		else
+			addError(tr("Column number in source use is bigger than the number of columns of %1").arg(name()));
+	}
+	else
+	{
+		if (what.isEmpty())
+			addError(tr("No column specified in the source of %1").arg(name()));
+		else
+			addError(tr("The source use does not specified a valid column in %1").arg(name()));
+	}
+
+
+	return _tempTerms;
+}
+
 QVariant ListModelTableViewBase::headerData( int section, Qt::Orientation orientation, int role) const
 {
 	if(section < 0 || section >= (orientation == Qt::Horizontal ? _colNames.length() : _rowNames.length()))

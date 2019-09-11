@@ -66,6 +66,8 @@ public:
 				const QVector<QVector<QVariant>>	&	values()	const { return _values;		}
 				const QVector<QString>				&	rowNames()	const { return _rowNames;	}
 				const QVector<QString>				&	colNames()	const { return _colNames;	}
+	virtual		const Terms&		terms(const QString& what = QString())														override;
+
 
 				void runRScript(		const QString & script);
 	virtual		void rScriptDoneHandler(const QString & result) { throw std::runtime_error("runRScript done but handler not implemented!\nImplement an override for RScriptDoneHandler and usesRScript\nResult was: "+result.toStdString()); }
@@ -94,6 +96,7 @@ protected:
 								_initialColCnt	= 0,
 								_initialRowCnt	= 0;
 	QVariant					_defaultCellVal;
+	Terms						_tempTerms;
 };
 
 #endif // LISTMODELTABLEVIEWBASE_H

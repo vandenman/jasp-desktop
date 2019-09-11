@@ -57,7 +57,8 @@ public:
 	void					addError(const QString& error) const;
 	virtual void			refresh();
 	virtual void			initTerms(const Terms &terms);
-	virtual Terms			getSourceTerms();
+	Terms					getSourceTerms();
+	QMap<ListModel*, Terms> getSourceTermsPerModel();
 	virtual void			endResetModel()									{ return QAbstractTableModel::endResetModel(); } // Make endResetModel virtual
 
 
@@ -73,6 +74,7 @@ protected:
 	Terms			_terms;
 	bool			_areTermsVariables;
 	bool			_areTermsInteractions = false;
+
 };
 
 #endif // LISTMODEL_H

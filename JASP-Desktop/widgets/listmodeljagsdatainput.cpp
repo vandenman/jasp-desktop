@@ -23,30 +23,38 @@
 #include "analysis/options/optionstring.h"
 #include "analysis/options/optionterm.h"
 
-void ListModelJAGSDataInput::sourceTermsChanged(Terms *termsAdded, Terms *)
+void ListModelJAGSDataInput::sourceTermsChanged(Terms *, Terms *)
 {
 	beginResetModel();
 
-	_rowNames.clear();
-	_colNames.clear();
-	_values.clear();
-	_columnCount = 0;
-
-	if (termsAdded && termsAdded->size() > 0)
+	Terms sourceTerms = getSourceTerms();
+	if (_values.length() > 0)
 	{
-		const std::string	& colName	= termsAdded->at(0).asString();
-		DataSet				* dataset	= listView()->form()->getDataSet();
-		Column				& column	= dataset->columns().get(colName);
-		Labels				& labels	= column.labels();
-
-		for (auto label : labels)
-			_rowNames.push_back(tq(label.text()));
-
-		QVector<QVariant> newValues(_rowNames.length(), 1.0);
-		_values.push_back(newValues);
-		_colNames.push_back(getColName(0));
-		_columnCount = 1;
-
+		QMap<QString, QVariant> mapping;
+		const QVector<QVariant>& firstCol = _values[0];
+		const QVector<QVariant>& secondCol = _values[1];
+		int row = 0;
+		for (const QVariant& key : firstCol)
+		{
+			mapping[key.toString()] = secondCol[row];
+			row++;
+		}
+		_values.clear();
+		_rowNames.clear();
+		_rowCount = sourceTerms.size();
+		for (size_t colNb = 1; colNb <= _rowCount; colNb++)
+			_rowNames.push_back(getRowName(colNb));
+		QList<QString> firstColumnValues = sourceTerms.asQList();
+		QVector<QVariant> firstColumn;
+		QVector<QVariant> secondColumn;
+		for (const QString& firstValue : firstColumnValues)
+		{
+			firstColumn.push_back(firstValue);
+			QVariant secondValue = mapping.contains(firstValue) ? mapping[firstValue] : _defaultCellVal;
+			secondColumn.push_back(secondValue);
+		}
+		_values.push_back(firstColumn);
+		_values.push_back(secondColumn);
 	}
 
 	endResetModel();
@@ -64,6 +72,14 @@ QString ListModelJAGSDataInput::getColName(size_t index)
 	return "R Code";
 }
 
+
+Qt::ItemFlags ListModelJAGSDataInput::flags(const QModelIndex &index) const
+{
+	if (index.column() == 0 && listView()->sourceModels().length() > 0)
+		return Qt::ItemIsSelectable | Qt::ItemIsEnabled;
+
+	return Qt::ItemIsSelectable | Qt::ItemIsEnabled | Qt::ItemIsEditable;
+}
 
 int ListModelJAGSDataInput::getMaximumColumnWidthInCharacters(size_t columnIndex) const
 {

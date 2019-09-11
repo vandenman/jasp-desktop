@@ -31,6 +31,7 @@ public:
 	{
 		_defaultCellVal = "...";
 	}
+	Qt::ItemFlags		flags(		const QModelIndex &index) const	override;
 
 	int getMaximumColumnWidthInCharacters(size_t columnIndex) const	override;
 

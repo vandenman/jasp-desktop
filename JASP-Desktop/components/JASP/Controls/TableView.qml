@@ -197,6 +197,7 @@ JASPControl
 					padding:			Theme.jaspControlPadding
 					verticalAlignment:	Text.AlignVCenter
 					validator:			tableView.validator
+					selectByMouse:		true
 					onPressed:			tableView.colSelected = columnIndex
 					onEditingFinished:
 					{

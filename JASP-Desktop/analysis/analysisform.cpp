@@ -226,6 +226,7 @@ void AnalysisForm::_parseQML()
 		{
 			BoundQMLTableView* tableView = new BoundQMLTableView(quickItem, this);
 			control = tableView;
+			_modelMap[controlName] = tableView->model();
 			break;
 		}
 		case qmlControlType::VariablesListView:
@@ -500,7 +501,7 @@ void AnalysisForm::bindTo()
 		else
 		{
 			QMLListViewTermsAvailable* availableListControl = dynamic_cast<QMLListViewTermsAvailable *>(control);
-			if (availableListControl)
+			if (availableListControl && availableListControl->hasSource())
 			{
 				ListModelAvailableInterface* availableModel = availableListControl->availableModel();
 				// The availableList control are not bound with options, but they have to be updated from their sources when the form is initialized.
