@@ -49,6 +49,7 @@ Popup
 					//spacing:	Theme.rowSpacing
 					height:		childrenRect.height
 
+					// title of the plot above the image
 					Text
 					{
 						id:							title
@@ -58,89 +59,7 @@ Popup
 						y:							Theme.generalAnchorMargin
 					}
 
-					Rectangle
-					{
-						id:				yAxisId
-						color:			Theme.white
-						border.color:	Theme.black
-						border.width:	preferencesModel.uiScale
-						width:			parent.width * 0.2
-
-						anchors
-						{
-							left:			parent.left
-							leftMargin:		Theme.generalAnchorMargin
-							top:			plotImgRect.top
-							bottom:			plotImgRect.bottom
-						}
-
-						TableView
-						{
-							id:						yAxis
-							clip:					true
-							model:					plotEditorModel.yAxis
-							delegate:				axisElement
-							anchors.fill:			parent
-							columnWidthProvider:	function(column) { return yAxis.width / 2 }
-						}
-					}
-
-					Rectangle
-					{
-						id:					yAxisTitle
-						z:					-1
-						color:				Theme.white
-						border.color:		Theme.black
-						border.width:		1
-						height:				Theme.font.pixelSize * 2
-
-						anchors
-						{
-							left:		yAxisId.left
-							top:		xAxisId.top
-							right:		yAxisId.right
-						}
-
-						TextInput
-						{
-							text:					plotEditorModel.yAxis.title
-							padding:				4 * preferencesModel.uiScale
-							font:					Theme.font
-							anchors.centerIn:		parent
-							horizontalAlignment:	Text.AlignHCenter
-							verticalAlignment:		Text.AlignVCenter
-							onEditingFinished:		plotEditorModel.yAxis.title = text
-						}
-					}
-
-					Rectangle
-					{
-						id:					xAxisTitle
-						z:					-1
-						color:				Theme.white
-						border.color:		Theme.black
-						border.width:		1
-						height:				Theme.font.pixelSize * 2
-
-						anchors
-						{
-							left:		yAxisTitle.left
-							right:		yAxisTitle.right
-							bottom:		xAxisId.bottom
-						}
-
-						TextInput
-						{
-							text:					plotEditorModel.xAxis.title
-							padding:				4 * preferencesModel.uiScale
-							font:					Theme.font
-							anchors.centerIn:		parent
-							horizontalAlignment:	Text.AlignHCenter
-							verticalAlignment:		Text.AlignVCenter
-							onEditingFinished:		plotEditorModel.xAxis.title = text
-						}
-					}
-
+					// the image of the plot on the right
 					Rectangle
 					{
 						id:						plotImgRect
@@ -168,6 +87,141 @@ Popup
 							x:					plotImgRect.border.width
 							y:					plotImgRect.border.width
 							mipmap:				true
+						}
+					}
+
+					// the box to modify the axes
+					Rectangle
+					{
+						id:				yAxisId
+						color:			Theme.white
+						border.color:	Theme.red
+						border.width:	preferencesModel.uiScale
+						width:			parent.width * 0.2
+
+						anchors.left:			parent.left
+						anchors.leftMargin:		Theme.generalAnchorMargin
+						anchors.top:			plotImgRect.top
+						anchors.bottom:			plotImgRect.bottom
+
+
+						Rectangle
+						{
+							id:					yaxisTitleRectangle
+							color:				Theme.white
+							border.color:		Theme.red
+							border.width:		1
+							height:				Theme.font.pixelSize * 2
+							anchors.top:		parent.top
+							anchors.topMargin:	Theme.generalAnchorMargin
+
+							Text
+							{
+								id:						yAxisTitle
+								font:					Theme.font
+								text:					qsTr("Y-axis title")
+								y:						Theme.generalAnchorMargin
+								anchors.verticalCenter: parent.verticalCenter
+								anchors.left:			parent.left
+							}
+						}
+
+						Rectangle
+						{
+							id:					inputYaxisTitle
+							color:				Theme.white
+							border.color:		Theme.rose
+							border.width:		1
+							height:				Theme.font.pixelSize * 2
+							anchors.top:		yaxisTitleRectangle.bottom
+							anchors.topMargin:	Theme.generalAnchorMargin
+
+							TextInput
+							{
+								text:					plotEditorModel.yAxis.title
+								padding:				4 * preferencesModel.uiScale
+								font:					Theme.font
+								onEditingFinished:		plotEditorModel.yAxis.title = text
+								anchors.verticalCenter: parent.verticalCenter
+								anchors.left:			parent.left
+							}
+						}
+
+						Rectangle
+						{
+							color:					Theme.white
+							border.color:			Theme.green
+							anchors.left:			parent.left
+							anchors.right:			parent.right
+							anchors.top:			inputYaxisTitle.bottom
+							anchors.bottom:			parent.bottom
+							anchors.topMargin:		Theme.generalAnchorMargin
+
+							TableView
+							{
+								id:						yAxis
+								clip:					true
+								model:					plotEditorModel.yAxis
+								delegate:				axisElement
+								anchors.fill:			parent
+								columnWidthProvider:	function(column) { return yAxis.width / 2 }
+							}
+						}
+					}
+
+					// Rectangle
+					// {
+					// 	id:					yAxisTitle
+					// 	z:					-1
+					// 	color:				Theme.white
+					// 	border.color:		Theme.black
+					// 	border.width:		1
+					// 	height:				Theme.font.pixelSize * 2
+
+					// 	anchors
+					// 	{
+					// 		left:		yAxisId.left
+					// 		top:		xAxisId.top
+					// 		right:		yAxisId.right
+					// 	}
+
+					// 	TextInput
+					// 	{
+					// 		text:					plotEditorModel.yAxis.title
+					// 		padding:				4 * preferencesModel.uiScale
+					// 		font:					Theme.font
+					// 		anchors.centerIn:		parent
+					// 		horizontalAlignment:	Text.AlignHCenter
+					// 		verticalAlignment:		Text.AlignVCenter
+					// 		onEditingFinished:		plotEditorModel.yAxis.title = text
+					// 	}
+					// }
+
+					Rectangle
+					{
+						id:					xAxisTitle
+						z:					-1
+						color:				Theme.white
+						border.color:		Theme.black
+						border.width:		1
+						height:				Theme.font.pixelSize * 2
+
+						anchors
+						{
+							left:		yAxisId.left
+							right:		yAxisId.right
+							bottom:		xAxisId.bottom
+						}
+
+						TextInput
+						{
+							text:					plotEditorModel.xAxis.title
+							padding:				4 * preferencesModel.uiScale
+							font:					Theme.font
+							anchors.centerIn:		parent
+							horizontalAlignment:	Text.AlignHCenter
+							verticalAlignment:		Text.AlignVCenter
+							onEditingFinished:		plotEditorModel.xAxis.title = text
 						}
 					}
 
@@ -232,7 +286,7 @@ Popup
 							TextInput
 							{
 								id:						editor
-								z:						2
+//								z:						2
 								text:					display
 								padding:				4 * preferencesModel.uiScale
 								font:					Theme.font
@@ -254,7 +308,7 @@ Popup
 														}
 								Rectangle
 								{
-									z:					-1
+//									z:					-1
 									color:				Theme.white
 									border.color:		Theme.black
 									border.width:		1
