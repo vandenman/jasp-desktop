@@ -2312,15 +2312,12 @@ as.list.footnotes <- function(footnotes) {
   image[["png"]] <- relativePathsvg
   
   if (obj) {
-    image[["obj"]]         <- plot
+    image[["obj"]]         <- plot2draw
     image[["editOptions"]] <- plotEditingOptions
   }
   
   return(image)
 }
-
-.pngFileToSvg <- function(pathSvg, pathPng, width, height) rsvg::rsvg_svg(pathSvg, pathPng, width, height)
-
 
 # not .saveImage() because RInside (interface to CPP) cannot handle that
 saveImage <- function(plotName, format, height, width)
@@ -2334,32 +2331,6 @@ saveImage <- function(plotName, format, height, width)
   # create file location string
   location <- .fromRCPP(".requestTempFileNameNative", "png") # to extract the root location
   relativePath <- paste0("temp.", format)
-  svgPath      <- file.path(location$root, plotName)
-  
-  saveSvgPlot <- switch(format,
-    "png" = rsvg::rsvg_png,
-    "pdf" = rsvg::rsvg_pdf,
-    "eps" = rsvg::rsvg_ps,
-    NULL
-  )
-  error <- NULL
-  if (is.null(saveSvgPlot)) {
-    error <- paste("Could not find graphics device for format:", format)
-  } else {
-    # rsvg returns NULL on success.
-    error <- try(saveSvgPlot(svg = svgPath, file = relativePath))
-  }
-  
-  # Create output for interpretation by JASP front-end and return it
-  output <- list(status = "imageSaved",
-                 results = list(name  = relativePath, error = FALSE))
-  if (!is.null(error)) {
-    output[["results"]][["error"]] <- TRUE
-    output[["results"]][["errorMessage"]] <- paste("Exception caught:", .extractErrorMessage(error))
-  }
-  
-  return(toJSON(output))
-  
   
   error <- try({
 		
@@ -2403,7 +2374,7 @@ saveImage <- function(plotName, format, height, width)
 			
 			hiResMultip <- 300 / 72
 			grDevices::tiff(
-				relativePath,
+			  filename    = relativePath,
 				width       = width * hiResMultip,
 				height      = height * hiResMultip,
 				res         = 300,
@@ -2426,6 +2397,18 @@ saveImage <- function(plotName, format, height, width)
 				bg = "transparent"
 			)
 			
+		} else if (format == "png") {
+
+		  # Open graphics device and plot
+		  grDevices::png(
+		    filename = relativePath,
+		    width    = width * pngMultip,
+		    height   = height * pngMultip,
+		    bg       = backgroundColor,
+		    res      = 72 * pngMultip,
+		    type     = type
+		  )
+
 		} else { # add optional other formats here in "else if"-statements
 		
 			stop("Format incorrectly specified")
