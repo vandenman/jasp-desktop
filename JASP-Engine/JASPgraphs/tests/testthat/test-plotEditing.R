@@ -1,6 +1,11 @@
 context("Plot Editing")
 
 data("mtcars")
+ensureCharacter            <- JASPgraphs:::ensureCharacter
+ensureCharacter.character  <- JASPgraphs:::ensureCharacter.character
+ensureCharacter.expression <- JASPgraphs:::ensureCharacter.expression
+ensureCharacter.NULL       <- JASPgraphs:::ensureCharacter.NULL
+ensureCharacter.default    <- JASPgraphs:::ensureCharacter.default
 
 test_that("manipulating continuous axes works", {
 
@@ -11,7 +16,7 @@ test_that("manipulating continuous axes works", {
   opts1b <- opts1a
   opts1b$xAxis$settings$breaks <- seq(10, 20, 2)
   opts1b$xAxis$settings$labels <- as.character(seq(10, 20, 2))
-  opts1b$xAxis$settings$title  <- "HOOOOI"
+  opts1b$xAxis$settings$title  <- ensureCharacter("HOOOOI")
   opts1b$xAxis$settings$expand[c(2, 4)] <- c(5, 10)
 
   g1b <- plotEditing(g1a, opts1b)
@@ -23,8 +28,43 @@ test_that("manipulating continuous axes works", {
 
   g1c <- plotEditing(g1a, opts1c)
   expect_equal(plotEditingOptions(g1c), opts1c)
+  
+})
 
+test_that("axes titles with uncommon axis labels return character", {
+  
+  g1a <- ggplot(mtcars, aes(x = mpg, y = disp)) + geom_line() + 
+    labs(x = expression(alpha^2), y = NULL)
+  
+  opts1a <- plotEditingOptions(g1a)
+  
+  expect_identical(
+    opts1a[["xAxis"]][["settings"]][["title"]],
+    list(value = "alpha^2", type = "expression"), 
+    label = "plotEditingOptions returns correct type for xAxis (expression)"
+  )
+  
+  expect_identical(
+    opts1a[["yAxis"]][["settings"]][["title"]],
+    list(value = "", type = "NULL"), 
+    label = "plotEditingOptions returns correct type for yAxis (NULL)"
+  )
+  
+  opts1b <- opts1a
+  opts1b$xAxis$settings$title <- ensureCharacter(NULL)
+  opts1b$yAxis$settings$title <- ensureCharacter(expression(beta^2))
 
+  g1b <- plotEditing(g1a, opts1b)
+  # debugonce(JASPgraphs:::plotEditingOptions.ggplot_built)
+  expect_equal(plotEditingOptions(g1b), opts1b)
+  
+  opts1c <- opts1a
+  opts1c$yAxis$settings$breaks <- seq(50, 400, 50)
+  opts1c$yAxis$settings$labels <- as.character(seq(50, 400, 50))
+  
+  g1c <- plotEditing(g1a, opts1c)
+  expect_equal(plotEditingOptions(g1c), opts1c)
+  
 })
 
 test_that("manipulating discrete axes works", {

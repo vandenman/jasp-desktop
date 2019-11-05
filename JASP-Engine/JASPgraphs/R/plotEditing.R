@@ -19,7 +19,23 @@ toJSON    <- function(x) jsonlite::toJSON(x, auto_unbox = TRUE, digits = NA, nul
   stringr::str_trim(last)
 }
 
+ensureCharacter            <- function(x) UseMethod("ensureCharacter", x)
+ensureCharacter.character  <- function(x) list(value = x,               type = "character")
+ensureCharacter.expression <- function(x) list(value = as.character(x), type = "expression")
+ensureCharacter.NULL       <- function(x) list(value = "",              type = "NULL")
+ensureCharacter.list       <- function(x) if (all(c("value", "type") %in% names(x))) x else ensureCharacter.default(x)
+ensureCharacter.default    <- function(x) list(value = as.character(x), type = paste(class(x), collapse = ","))
 
+readCharacter <- function(x) {
+  if (!all(c("value", "type") %in% names(x)))
+    stop("incorrect input to readCharacter")
+
+  return(switch(x[["type"]],
+    "expression" = parse(text = x[["value"]]), # TODO: error handling!
+    "NULL"       = NULL,
+    x[["value"]]
+  ))
+}
 
 #' @importFrom ggplot2 layer_scales is.ggplot ggplot_build
 
@@ -61,10 +77,11 @@ getAxisType.ggplot <- function(x) {
 
 getAxisTitle <- function(x, xory) {
   if (xory == "x") {
-    return(x[["layout"]][["panel_scales_x"]][[1L]][["name"]] %|NW|% x[["plot"]][["labels"]][["x"]])
+    ans <- x[["layout"]][["panel_scales_x"]][[1L]][["name"]] %|NW|% x[["plot"]][["labels"]][["x"]]
   } else {
-    return(x[["layout"]][["panel_scales_y"]][[1L]][["name"]] %|NW|% x[["plot"]][["labels"]][["y"]])
+    ans <- x[["layout"]][["panel_scales_y"]][[1L]][["name"]] %|NW|% x[["plot"]][["labels"]][["y"]]
   }
+  return(ensureCharacter(ans))
 }
 
 
@@ -120,7 +137,7 @@ getAxisInfo.ScaleDiscretePosition <- function(x, opts, ggbuild) {
 
 internalUpdateAxis <- function(currentAxis, newSettings) {
   if (!is.null(newSettings[["title"]]))
-    currentAxis[["name"]] <- newSettings[["title"]]
+    currentAxis[["name"]] <- readCharacter(newSettings[["title"]])
   UseMethod("internalUpdateAxis", currentAxis)
 }
 
@@ -255,11 +272,18 @@ plotEditing <- function(graph, newOptions) {
 
   currentAxis <- ggbuild[["layout"]][["get_scales"]](1L)
 
-  if (length(diffOptions[["xAxis"]][["settings"]]) > 0L)
+  # TODO: rather than (ab)using +, it might be better to modify graph inside a function call
+  if (length(diffOptions[["xAxis"]][["settings"]]) > 0L) {
     graph <- graph + internalUpdateAxis(currentAxis[["x"]], diffOptions[["xAxis"]][["settings"]])
+    if (!is.null(diffOptions[["xAxis"]][["settings"]][["title"]]))
+      graph[["labels"]][["x"]] <- diffOptions[["xAxis"]][["settings"]][["title"]]
+  }
 
-  if (length(diffOptions[["yAxis"]][["settings"]]) > 0L)
+  if (length(diffOptions[["yAxis"]][["settings"]]) > 0L) {
     graph <- graph + internalUpdateAxis(currentAxis[["y"]], diffOptions[["yAxis"]][["settings"]])
+    if (!is.null(diffOptions[["yAxis"]][["settings"]][["title"]]))
+      graph[["labels"]][["y"]] <- diffOptions[["yAxis"]][["settings"]][["title"]]
+  }
 
   return(graph)
 
