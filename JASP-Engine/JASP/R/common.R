@@ -2889,7 +2889,7 @@ editImage <- function(optionsJson) {
 
   # recursive function that traverses the entire state object to replace old figures with new figures
   # it searches a list where lst[["data"]] == identifier and then does lst[["obj"]] <- replacement
-  # TODO: also add specific modifications for writeImage?
+  # TODo: also add specific modifications for writeImage?
 
   # completeObject: boolean. If TRUE, then the complete sublist identified by the identifier will
   #                 be replaced by replacement. If FALSE, replacement should be a list where the
