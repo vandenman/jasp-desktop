@@ -57,14 +57,14 @@ void PlotEditorModel::processImgOptions()
 	setHeight(				_imgOptions.get(	"height",		100).asInt());
 
 	//_editOptions		=	_imgOptions.get(	"editOptions",	Json::objectValue);
-	_editOptions		=	_name == "" || !_analysis ? Json::objectValue : _analysis->editOptionsOfPlot(_name.toStdString());
+    _editOptions		=	_name == "" || !_analysis ? Json::objectValue : _analysis->editOptionsOfPlot(_name.toStdString());
 	Json::Value	xAxis	=	_editOptions.get(	"xAxis",		Json::objectValue),
 				yAxis	=	_editOptions.get(	"yAxis",		Json::objectValue);
 
 	_xAxis->setAxisData(xAxis);
-	_yAxis->setAxisData(yAxis);
+    _yAxis->setAxisData(yAxis);
 
-	_coordinates.loadCoordinates(_editOptions.get("coordinates", Json::objectValue)); // To Do Vincent Pedata: is this the right json object?
+    _coordinates.loadCoordinates(_editOptions.get("graphsCoords", Json::objectValue)); // To Do Vincent Pedata: is this the right json object?
 
 }
 
@@ -83,12 +83,15 @@ Json::Value PlotEditorModel::generateImgOptions() const
 	return imgOptions;
 }
 
+//Responsible for the logs that we get! VINCENTPEDATA for ctrl+f.
+//adding anything to xAxis and yAxis will obviously show, because that's all that's being called!
+//reason for the "To Do" is to see if we want that to get logged.
 Json::Value PlotEditorModel::generateEditOptions() const
 {
 	Json::Value		editOptions = _editOptions;
 
 	editOptions["xAxis"]		= _xAxis->getAxisData();
-	editOptions["yAxis"]		= _yAxis->getAxisData();
+    editOptions["yAxis"]		= _yAxis->getAxisData();
 
 	// To Do Vincent Pedata: Do we need to send the coordinates back? No right?
 

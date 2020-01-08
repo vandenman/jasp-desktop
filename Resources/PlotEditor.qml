@@ -56,90 +56,91 @@ Popup
 						text:						plotEditorModel.title
 						anchors.horizontalCenter:	parent.horizontalCenter
 						y:							Theme.generalAnchorMargin
-					}
+                    }
 
-					Rectangle
-					{
-						id:				yAxisId
-						color:			Theme.white
-						border.color:	Theme.black
-						border.width:	preferencesModel.uiScale
-						width:			parent.width * 0.2
+                    Rectangle
+                    {
+                        id:				yAxisId
+                        color:			Theme.white
+                        border.color:	Theme.black
+                        border.width:	preferencesModel.uiScale
+                        width:			parent.width * 0.2
+                        z:              1
 
-						anchors
-						{
-							left:			parent.left
-							leftMargin:		Theme.generalAnchorMargin
-							top:			plotImgRect.top
-							bottom:			plotImgRect.bottom
-						}
+                        anchors
+                        {
+                            left:			parent.left
+                            leftMargin:		Theme.generalAnchorMargin
+                            top:			plotImgRect.top
+                            bottom:			plotImgRect.bottom
+                        }
 
-						TableView
-						{
-							id:						yAxis
-							clip:					true
-							model:					plotEditorModel.yAxis
-							delegate:				axisElement
-							anchors.fill:			parent
-							columnWidthProvider:	function(column) { return yAxis.width / 2 }
-						}
-					}
+                        TableView
+                        {
+                            id:						yAxis
+                            clip:					true
+                            model:					plotEditorModel.yAxis
+                            delegate:				axisElement
+                            anchors.fill:			parent
+                            columnWidthProvider:	function(column) { return yAxis.width / 2 }
+                        }
+                    }
 
-					Rectangle
-					{
-						id:					yAxisTitle
-						z:					-1
-						color:				Theme.white
-						border.color:		Theme.black
-						border.width:		1
-						height:				Theme.font.pixelSize * 2
+                    Rectangle
+                    {
+                        id:					yAxisTitle
+                        z:					-1
+                        color:				Theme.white
+                        border.color:		Theme.black
+                        border.width:		1
+                        height:				Theme.font.pixelSize * 2
 
-						anchors
-						{
-							left:		yAxisId.left
-							top:		xAxisId.top
-							right:		yAxisId.right
-						}
+                        anchors
+                        {
+                            left:		yAxisId.left
+                            top:		xAxisId.top
+                            right:		yAxisId.right
+                        }
 
-						TextInput
-						{
-							text:					plotEditorModel.yAxis.title
-							padding:				4 * preferencesModel.uiScale
-							font:					Theme.font
-							anchors.centerIn:		parent
-							horizontalAlignment:	Text.AlignHCenter
-							verticalAlignment:		Text.AlignVCenter
-							onEditingFinished:		plotEditorModel.yAxis.title = text
-						}
-					}
+                        TextInput
+                        {
+                            text:					plotEditorModel.yAxis.title
+                            padding:				4 * preferencesModel.uiScale
+                            font:					Theme.font
+                            anchors.centerIn:		parent
+                            horizontalAlignment:	Text.AlignHCenter
+                            verticalAlignment:		Text.AlignVCenter
+                            onEditingFinished:		plotEditorModel.yAxis.title = text
+                        }
+                    }
 
-					Rectangle
-					{
-						id:					xAxisTitle
-						z:					-1
-						color:				Theme.white
-						border.color:		Theme.black
-						border.width:		1
-						height:				Theme.font.pixelSize * 2
+                    Rectangle
+                    {
+                        id:					xAxisTitle
+                        z:					-1
+                        color:				Theme.white
+                        border.color:		Theme.black
+                        border.width:		1
+                        height:				Theme.font.pixelSize * 2
 
-						anchors
-						{
-							left:		yAxisTitle.left
-							right:		yAxisTitle.right
-							bottom:		xAxisId.bottom
-						}
+                        anchors
+                        {
+                            left:		yAxisTitle.left
+                            right:		yAxisTitle.right
+                            bottom:		xAxisId.bottom
+                        }
 
-						TextInput
-						{
-							text:					plotEditorModel.xAxis.title
-							padding:				4 * preferencesModel.uiScale
-							font:					Theme.font
-							anchors.centerIn:		parent
-							horizontalAlignment:	Text.AlignHCenter
-							verticalAlignment:		Text.AlignVCenter
-							onEditingFinished:		plotEditorModel.xAxis.title = text
-						}
-					}
+                        TextInput
+                        {
+                            text:					plotEditorModel.xAxis.title
+                            padding:				4 * preferencesModel.uiScale
+                            font:					Theme.font
+                            anchors.centerIn:		parent
+                            horizontalAlignment:	Text.AlignHCenter
+                            verticalAlignment:		Text.AlignVCenter
+                            onEditingFinished:		plotEditorModel.xAxis.title = text
+                        }
+                    }
 
 					Rectangle
 					{
@@ -190,33 +191,33 @@ Popup
 
 							}
 						}
-					}
+                    }
 
-					Rectangle
-					{
-						id:				xAxisId
-						color:			Theme.white
-						border.color:	Theme.black
-						border.width:	preferencesModel.uiScale
-						height:			Theme.font.pixelSize * 4.5
+                    Rectangle
+                    {
+                        id:				xAxisId
+                        color:			Theme.white
+                        border.color:	Theme.black
+                        border.width:	preferencesModel.uiScale
+                        height:			Theme.font.pixelSize * 4.5
 
-						anchors
-						{
-							top:		plotImgRect.bottom
-							topMargin:	Theme.generalAnchorMargin
-							left:		plotImgRect.left
-							right:		plotImgRect.right
-						}
+                        anchors
+                        {
+                            top:		plotImgRect.bottom
+                            topMargin:	Theme.generalAnchorMargin
+                            left:		plotImgRect.left
+                            right:		plotImgRect.right
+                        }
 
-						TableView
-						{
-							id:				xAxis
-							clip:			true
-							model:			plotEditorModel.xAxis
-							delegate:		axisElement
-							anchors.fill:	parent
-						}
-					}
+                        TableView
+                        {
+                            id:				xAxis
+                            clip:			true
+                            model:			plotEditorModel.xAxis
+                            delegate:		axisElement
+                            anchors.fill:	parent
+                        }
+                    }
 
 
 					Component

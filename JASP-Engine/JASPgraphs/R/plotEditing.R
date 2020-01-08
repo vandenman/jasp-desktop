@@ -191,7 +191,6 @@ plotEditingOptions.gg <- function(graph, asJSON = FALSE) {
 
 #' @export
 plotEditingOptions.ggplot <- function(graph, asJSON = FALSE) {
-
   ggbuild <- ggplot_build(graph)
   return(plotEditingOptions.ggplot_built(ggbuild, asJSON))
 
@@ -199,7 +198,6 @@ plotEditingOptions.ggplot <- function(graph, asJSON = FALSE) {
 
 #' @export
 plotEditingOptions.ggplot_built <- function(graph, asJSON = FALSE) {
-
   # only relevant for continuous scales?
   e <- try({
     opts <- graph[["layout"]][["coord"]][["labels"]](graph[["layout"]][["panel_params"]])[[1L]]
@@ -208,14 +206,16 @@ plotEditingOptions.ggplot_built <- function(graph, asJSON = FALSE) {
     
     xSettings <- getAxisInfo(currentAxis[["x"]], opts, graph)
     ySettings <- getAxisInfo(currentAxis[["y"]], opts, graph)
-    
-    out <- list(xAxis = list(
-      type     = axisTypes[["x"]],
-      settings = xSettings
-    ), yAxis = list(
-      type     = axisTypes[["y"]],
-      settings = ySettings
-    )
+    gCoords <- createCoords(ggplot2::ggplot_gtable(ggbuild))
+
+    out <- list(
+            xAxis = list(
+                type     = axisTypes[["x"]],
+                 settings = xSettings),
+            yAxis = list(
+                type     = axisTypes[["y"]],
+                settings = ySettings),
+            coordinates = gCoords
     )
   })
   
