@@ -33,3 +33,8 @@ skip_if_recordedPlot <- function(test) {
   if (inherits(test, "recordedplot"))
     skip("Recorded plots are skipped until the scaling of these plots is fixed")
 }
+
+# enable partial matches and set a tolerance
+options("vdiffr.partial_match"           = TRUE)
+options("vdiffr.partial_match_is_ok"     = TRUE)
+options("vdiffr.partial_match_tolerance" = 10)

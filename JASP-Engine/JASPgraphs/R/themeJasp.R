@@ -113,7 +113,8 @@ themeJaspRaw = function(legend.position = "none",
         # panel
         panel.border = element_rect(color = "transparent", fill = "transparent", size = 0),
         panel.spacing = unit(2, "cm"),
-        panel.grid = element_blank(),
+        # panel.grid = element_blank(),
+        panel.grid = element_line(size = 0, color = "transparent"),
         panel.background = element_rect(color = "transparent", fill = "transparent"),
 
         # plot

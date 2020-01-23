@@ -6,6 +6,8 @@ library(testthat)
 develop(path = file.path("..", "..", ".."))
 setPkgOption("pkgs.dir", "~/pkgs/Frameworks/R.framework/Versions/3.6/Resources/library")
 
+remotes::install_github("vandenman/vdiffr", "bitmap_comparison")
+
 options("testthat.progress.max_fails" = 1E3L)
 
 result <- test_dir("testthat")
