@@ -1,4 +1,4 @@
-﻿import QtQuick			2.12
+﻿import QtQuick			2.13
 import JASP.Widgets		1.0
 import JASP.Theme		1.0
 import QtQuick.Controls	2.4
@@ -65,7 +65,6 @@ Popup
                         border.color:	Theme.black
                         border.width:	preferencesModel.uiScale
                         width:			parent.width * 0.2
-                        z:              1
 
                         anchors
                         {
@@ -74,7 +73,7 @@ Popup
                             top:			plotImgRect.top
                             bottom:			plotImgRect.bottom
                         }
-
+/*
                         TableView
                         {
                             id:						yAxis
@@ -84,8 +83,9 @@ Popup
                             anchors.fill:			parent
                             columnWidthProvider:	function(column) { return yAxis.width / 2 }
                         }
+                        */
                     }
-
+/*
                     Rectangle
                     {
                         id:					yAxisTitle
@@ -141,7 +141,7 @@ Popup
                             onEditingFinished:		plotEditorModel.xAxis.title = text
                         }
                     }
-
+*/
 					Rectangle
 					{
 						id:						plotImgRect
@@ -179,20 +179,21 @@ Popup
 								cursorShape:	Qt.PointingHandCursor
 								onClicked:
 								{
-									var x = mouse.x; //real and relative to mouseArea
-									var y = mouse.y; //real
+                                    var x = mouse.x / width; //real and relative to mouseArea
+                                    var y = mouse.y / height; //real
 
 									// To Do Vincent Pedata: Make sure that the x and y here are scaled properly for your coordinates
+                                    // Ive now done this, by making sure the coordinates are sent as "npc" or normalized coordinates (0,0 -> 1,1) and dividing the mouse coordinates by size
 									var pickedElement = plotEditorModel.clickHitsElement(x, y);
 
 									if(pickedElement !== "")
-										message("Element " + pickedElement + " was picked!"); // To Do Vincent Pedata: This should obviously be something more than just a msg :p
+                                        console.log("Element " + pickedElement + " was picked!"); // To Do Vincent Pedata: This should obviously be something more than just a msg :p
 								}
 
 							}
 						}
                     }
-
+/*
                     Rectangle
                     {
                         id:				xAxisId
@@ -219,7 +220,7 @@ Popup
                         }
                     }
 
-
+*/
 					Component
 					{
 						id:		axisElement

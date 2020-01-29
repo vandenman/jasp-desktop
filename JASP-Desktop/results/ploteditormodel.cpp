@@ -64,7 +64,7 @@ void PlotEditorModel::processImgOptions()
 	_xAxis->setAxisData(xAxis);
     _yAxis->setAxisData(yAxis);
 
-    _coordinates.loadCoordinates(_editOptions.get("graphsCoords", Json::objectValue)); // To Do Vincent Pedata: is this the right json object?
+   _coordinates.loadCoordinates(_editOptions.get("coordinates", Json::objectValue)); // To Do Vincent Pedata: is this the right json object?
 
 }
 

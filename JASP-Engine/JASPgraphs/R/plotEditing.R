@@ -206,7 +206,7 @@ plotEditingOptions.ggplot_built <- function(graph, asJSON = FALSE) {
     
     xSettings <- getAxisInfo(currentAxis[["x"]], opts, graph)
     ySettings <- getAxisInfo(currentAxis[["y"]], opts, graph)
-    gCoords <- createCoords(ggplot2::ggplot_gtable(ggbuild))
+    gCoords <- createCoords(ggplot2::ggplot_gtable(graph))
 
     out <- list(
             xAxis = list(
