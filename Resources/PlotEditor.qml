@@ -193,7 +193,7 @@ Popup
 							}
 						}
                     }
-/*
+
                     Rectangle
                     {
                         id:				xAxisId
@@ -220,7 +220,6 @@ Popup
                         }
                     }
 
-*/
 					Component
 					{
 						id:		axisElement
