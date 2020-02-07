@@ -1,4 +1,4 @@
-﻿import QtQuick			2.13
+﻿import QtQuick			2.12
 import JASP.Widgets		1.0
 import JASP.Theme		1.0
 import QtQuick.Controls	2.4
@@ -73,7 +73,7 @@ Popup
                             top:			plotImgRect.top
                             bottom:			plotImgRect.bottom
                         }
-/*
+
                         TableView
                         {
                             id:						yAxis
@@ -83,7 +83,7 @@ Popup
                             anchors.fill:			parent
                             columnWidthProvider:	function(column) { return yAxis.width / 2 }
                         }
-                        */
+
                     }
 /*
                     Rectangle
