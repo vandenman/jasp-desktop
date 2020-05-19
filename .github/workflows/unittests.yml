@@ -12,11 +12,30 @@ on:
 jobs:
   build:
     runs-on: macOS-latest
+    env:
+      R_REMOTES_NO_ERRORS_FROM_WARNINGS: true
+      VDIFFR_RUN_TESTS: true
+
     steps:
       - uses: actions/checkout@v2
       - name: Setup R
         uses: r-lib/actions/setup-r@master
         with:
           r-version: '3.6.1'
-      - run: Rscript -e 'print("hello"); print(version)'
-        
+
+      - name: test R
+        run: Rscript -e 'print("hello"); print(version)'
+
+      - name: clone required-files
+        run: git clone --branch=MacOS-Original https://github.com/jasp-stats/jasp-required-files.git ~/pkgs
+
+      - name: Install R packages
+        working-directory: ./JASP-Tests/R/tests/
+        run: |
+          Rscript -e "print(getwd())"
+          R < install.R --no-save
+      
+      - name: Run unit tests
+        working-directory: ./JASP-Tests/R/tests/
+        run: R < testthat.R --no-save
+
