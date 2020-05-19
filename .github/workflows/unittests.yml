@@ -16,6 +16,7 @@ jobs:
       matrix:
         R: [ '3.6.1' ]
     name: R ${{ matrix.R }} sample
+    
     steps:
       - uses: actions/checkout@master
       - name: Setup R
