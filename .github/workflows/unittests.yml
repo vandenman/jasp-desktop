@@ -1,0 +1,42 @@
+name: R-check
+
+# Controls when the action will run. Triggers the workflow on push or pull request
+# events but only for the master branch
+on:
+  push:
+    branches: [ github_actions_test ]
+  pull_request:
+    branches: [ github_actions_test ]
+
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  build:
+    runs-on: macOS-latest
+    strategy:
+      matrix:
+        R: ['3.6.1']
+    name: R ${{ matrix.R }} sample
+    
+    env:
+      R_REMOTES_NO_ERRORS_FROM_WARNINGS: true
+      VDIFFR_RUN_TESTS: true
+  
+    steps:
+      - name: clone required-files
+        run: git clone --branch=MacOS-Original https://github.com/jasp-stats/jasp-required-files.git ~/pkgs
+        
+      - uses: actions/checkout@master
+      - name: Setup R
+        uses: actions/setup-R@v1
+        with:
+          r-version: ${{ matrix.R }}
+      - run: Rscript -e 'print("hello")'
+        
+      - name: Install R packages
+        working-directory: ./JASP-Tests/R/tests/
+        run: R < install.R --no-save
+      
+      - name: Run unit tests
+        working-directory: ./JASP-Tests/R/tests/
+        run: R < testthat.R --no-save
