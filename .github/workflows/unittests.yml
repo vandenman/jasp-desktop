@@ -4,9 +4,9 @@ name: R-check
 # events but only for the master branch
 on:
   push:
-    branches: [ stable ]
+    branches: [ github_actions_test ]
   pull_request:
-    branches: [ stable ]
+    branches: [ github_actions_test ]
 
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
@@ -23,16 +23,18 @@ jobs:
       VDIFFR_RUN_TESTS: true
   
     steps:
-      - name: clone required-files
-        run: git clone --branch=MacOS-Original https://github.com/jasp-stats/jasp-required-files.git ~/pkgs
+      
+      - uses: actions/checkout@stable
         
-      - uses: actions/checkout@master
       - name: Setup R
-        uses: actions/setup-R@v1
         with:
           r-version: ${{ matrix.R }}
-      - run: Rscript -e 'print("hello")'
-        
+      - uses: r-lib/actions/setup-r@v1
+      - run: Rscript -e 'print("hello"); print(version)'
+
+      - name: clone required-files
+        run: git clone --branch=MacOS-Original https://github.com/jasp-stats/jasp-required-files.git ~/pkgs
+
       - name: Install R packages
         working-directory: ./JASP-Tests/R/tests/
         run: R < install.R --no-save
