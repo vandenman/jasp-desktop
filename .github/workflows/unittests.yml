@@ -4,9 +4,9 @@ name: R-check
 # events but only for the master branch
 on:
   push:
-    branches: [ github_actions_test ]
+    branches: [ github_actions_tests ]
   pull_request:
-    branches: [ github_actions_test ]
+    branches: [ github_actions_tests ]
 
 
 jobs:
