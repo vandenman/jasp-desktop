@@ -242,8 +242,8 @@ jaspObjR <- R6Class(
 					stop("please provide a named list in `optionContainsValue`", domain = NA)
 				for (i in seq_along(optionContainsValue)) {
 					name <- names(optionContainsValue)[i]
-					value <- optionContainsValue[[i]]
-					private$jaspObject$setOptionMustContainDependency(name, value)
+					for (value in optionContainsValue[[i]])
+						private$jaspObject$setOptionMustContainDependency(name, value)
 				}
 			}
 		}
