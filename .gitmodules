@@ -157,4 +157,7 @@
 [submodule "Modules/jaspBFF"]
 	path = Modules/jaspBFF
 	url = https://github.com/jasp-stats/jaspBFF
+[submodule "Modules/jaspSurvey"]
+	path = Modules/jaspSurvey
+	url = https://github.com/vandenman/jaspSurvey
 	branch = master
