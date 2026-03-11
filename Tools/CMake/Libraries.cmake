@@ -68,7 +68,7 @@ if((NOT LibArchive_FOUND) AND (NOT WIN32))
 endif()
 
 set(Boost_USE_STATIC_LIBS ON)
-find_package(Boost 1.78 REQUIRED COMPONENTS system)
+find_package(Boost 1.78)
 find_package(Qt6 REQUIRED COMPONENTS Core)
 
 get_target_property(QT_TARGET_TYPE Qt6::Core TYPE)
@@ -91,7 +91,6 @@ if(NOT FLATPAK_USED)
       QuickControls2Impl
       QmlWorkerScript
       QuickWidgets
-      Core5Compat
   )
   if(NOT USE_QT_STATIC_LIBS)
     find_package(
@@ -104,6 +103,7 @@ if(NOT FLATPAK_USED)
                Sql
                DBus
                LabsFolderListModel
+               Core5Compat
     )
   endif()
 
@@ -253,7 +253,7 @@ endif()
 if(WIN32)
 
   include(FindRToolsDLLPath)
-  
+
   find_package(freexl 2.0.99 REQUIRED)
 
   copy_rtools_header(RTOOLS_LIBREADSTAT_H	readstat.h		${CMAKE_SOURCE_DIR}/Desktop/data/importers/readstat/readstat.h)

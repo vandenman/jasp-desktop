@@ -30,12 +30,12 @@ QValidator::State JASPDoubleValidator::validate(QString& s, int& pos) const
 	}
 
 	if (s.startsWith("-") && bottom() >= 0)
-		return QValidator::Invalid; 
-	
+		return QValidator::Invalid;
+
 	// check range of value
 	double value;
 	bool isNumber	= QColumnUtils::getDoubleValue(	s, value);
-	
+
 	// check length of decimal places
 	int indexPoint = s.indexOf(QColumnUtils::decimalPoint());
 
@@ -43,12 +43,12 @@ QValidator::State JASPDoubleValidator::validate(QString& s, int& pos) const
 	{
 		if (decimals() == 0)
 			return QValidator::Invalid;
-		
+
 		int lengthDecimals = s.length() - indexPoint - 1;
 		if (lengthDecimals > decimals())
 			return QValidator::Invalid;
 	}
-	
+
 
 	if (!isNumber)
 	{

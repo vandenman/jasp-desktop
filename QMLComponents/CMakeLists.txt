@@ -61,7 +61,7 @@ target_link_libraries(
 	Qt::QuickControls2Impl
 	Qt::QuickWidgets
 	Qt::QuickTemplates2
-	$<$<NOT:$<BOOL:${FLATPAK_USED}>>:Qt::Core5Compat>
+	$<$<AND:$<NOT:$<BOOL:${FLATPAK_USED}>>,$<NOT:$<BOOL:${USE_QT_STATIC_LIBS}>>>:Qt::Core5Compat>
 	$<$<BOOL:${FLATPAK_USED}>:/app/lib/$ENV{FLATPAK_ARCH}-linux-gnu/libQt6Core5Compat.so>
 )
 
